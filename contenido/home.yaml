@@ -1,0 +1,17 @@
+# Fotos que salen en la página de inicio, en este orden.
+# Cada línea es: categoría/proyecto/archivo  (tal como están las carpetas dentro de contenido/proyectos)
+# Al pulsar una foto se abre su proyecto.
+
+fotos:
+  - moda/ejemplo-moda-1/03.jpg
+  - musica/ejemplo-musica-1/02.jpg
+  - interiorismo/ejemplo-interiorismo-1/01.jpg
+  - personal/ejemplo-personal-1/03.jpg
+  - eventos/ejemplo-eventos-1/01.jpg
+  - moda/ejemplo-moda-1/01.jpg
+  - foto-fija/ejemplo-foto-fija-1/01.jpg
+  - personal/ejemplo-personal-2/01.jpg
+  - interiorismo/ejemplo-interiorismo-2/02.jpg
+  - musica/ejemplo-musica-1/05.jpg
+  - moda/ejemplo-moda-2/02.jpg
+  - personal/ejemplo-personal-1/05.jpg

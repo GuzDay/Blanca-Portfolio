@@ -1,0 +1,12 @@
+# Datos generales de la web.
+# Cambia solo lo que está entre comillas. Lo que va entre [corchetes] está pendiente de rellenar.
+
+nombre: "Blanca G. Tarrio"          # Nombre que sale arriba a la izquierda (confirmar cómo se escribe)
+email: "[email]"                    # Email de contacto, p. ej. "hola@blancagtarrio.com"
+instagram: "[usuario]"              # Usuario de Instagram, sin @
+telefono: ""                        # Opcional. Déjalo vacío ("") para que no aparezca
+
+# Datos del aviso legal (obligatorios en España para una web profesional)
+titular: "[Nombre y apellidos]"
+nif: "[NIF]"
+domicilio: "[Dirección postal]"

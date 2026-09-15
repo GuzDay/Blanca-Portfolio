@@ -1,0 +1,52 @@
+---
+// Vídeo con portada y botón de play. Al pulsar se reproduce con sonido y controles.
+import { getImage } from 'astro:assets';
+import type { Video } from '../lib/contenido';
+
+interface Props {
+  video: Video;
+  etiqueta: string;
+  textoReproducir: string;
+}
+
+const { video, etiqueta, textoReproducir } = Astro.props;
+const portada = video.portada
+  ? await getImage({ src: video.portada, width: Math.min(video.portada.width, 1920), format: 'webp' })
+  : undefined;
+---
+
+<figure class:list={['video', video.vertical && 'vertical']} style={`aspect-ratio: ${video.ancho} / ${video.alto}`}>
+  <video
+    src={portada ? video.src : `${video.src}#t=0.1`}
+    poster={portada?.src}
+    preload={portada ? 'none' : 'metadata'}
+    playsinline
+    aria-label={etiqueta}
+  ></video>
+  <button class="video-play" type="button" aria-label={textoReproducir}><span aria-hidden="true"></span></button>
+</figure>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.video').forEach((figura) => {
+    const video = figura.querySelector('video');
+    const boton = figura.querySelector('.video-play');
+    boton?.addEventListener('click', () => {
+      figura.classList.add('activo');
+      if (video) {
+        video.controls = true;
+        video.play();
+      }
+    });
+  });
+
+  // Si empieza un vídeo, se pausan los demás
+  document.addEventListener(
+    'play',
+    (evento) => {
+      document.querySelectorAll('video').forEach((video) => {
+        if (video !== evento.target) video.pause();
+      });
+    },
+    true,
+  );
+</script>

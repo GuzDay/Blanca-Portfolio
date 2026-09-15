@@ -1,0 +1,28 @@
+---
+import Foto from './Foto.astro';
+import Video from './Video.astro';
+import { textos } from '../i18n/textos';
+import type { Idioma } from '../i18n/categorias';
+import type { Elemento } from '../lib/contenido';
+
+interface Props {
+  elemento: Elemento;
+  sizes: string;
+  indice: number; // posición de la foto dentro del visor
+  titulo: string;
+  idioma: Idioma;
+}
+
+const { elemento, sizes, indice, titulo, idioma } = Astro.props;
+const t = textos[idioma];
+---
+
+{
+  elemento.tipo === 'foto' ? (
+    <button type="button" class="abrir-visor" data-indice={indice} aria-label={`${t.ampliar} ${indice + 1}`}>
+      <Foto imagen={elemento.imagen} alt={`${titulo} — ${t.foto} ${indice + 1}`} sizes={sizes} prioridad={indice === 0} />
+    </button>
+  ) : (
+    <Video video={elemento} etiqueta={`${titulo} — ${t.video}`} textoReproducir={t.reproducir} />
+  )
+}

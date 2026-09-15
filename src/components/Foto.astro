@@ -1,0 +1,25 @@
+---
+// Una foto optimizada: Astro genera varios tamaños y el navegador descarga el adecuado.
+import { Image } from 'astro:assets';
+
+interface Props {
+  imagen: ImageMetadata;
+  alt: string;
+  sizes: string; // qué ancho ocupa en pantalla, para elegir el tamaño justo
+  prioridad?: boolean; // true solo para la primera foto visible
+}
+
+const { imagen, alt, sizes, prioridad = false } = Astro.props;
+const ANCHOS = [480, 800, 1200, 1600, 2000, 2500];
+const anchos = [...new Set([...ANCHOS.filter((w) => w < imagen.width), Math.min(imagen.width, 2500)])];
+---
+
+<Image
+  src={imagen}
+  alt={alt}
+  widths={anchos}
+  sizes={sizes}
+  loading={prioridad ? 'eager' : 'lazy'}
+  fetchpriority={prioridad ? 'high' : 'auto'}
+  decoding="async"
+/>

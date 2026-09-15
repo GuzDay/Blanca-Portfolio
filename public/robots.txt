@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /maquetas/
+
+Sitemap: https://blancagtarrio.com/sitemap.xml

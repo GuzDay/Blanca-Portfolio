@@ -1,0 +1,15 @@
+---
+import VistaProyecto from '../../components/vistas/VistaProyecto.astro';
+import { proyectos } from '../../lib/contenido';
+
+export function getStaticPaths() {
+  return proyectos.map((proyecto) => ({
+    params: { categoria: proyecto.categoria.slug.es, proyecto: proyecto.slug },
+    props: { proyecto },
+  }));
+}
+
+const { proyecto } = Astro.props;
+---
+
+<VistaProyecto idioma="es" proyecto={proyecto} />

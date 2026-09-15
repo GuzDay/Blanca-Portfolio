@@ -1,0 +1,90 @@
+---
+// Home, variante "Pase": una foto cada vez, ocupando la pantalla; cambia sola.
+import Foto from '../Foto.astro';
+import type { Idioma } from '../../i18n/categorias';
+import type { FotoInicio } from '../../lib/contenido';
+import { textos } from '../../i18n/textos';
+import { urlProyecto } from '../../lib/rutas';
+
+interface Props {
+  fotos: FotoInicio[];
+  idioma: Idioma;
+}
+
+const { fotos, idioma } = Astro.props;
+const t = textos[idioma];
+const primera = fotos[0];
+---
+
+{
+  primera && (
+    <div class="inicio-pase">
+      {fotos.map((foto, i) => (
+        <figure
+          class:list={['pase-diapositiva', i === 0 && 'activa']}
+          data-titulo={foto.proyecto.titulo}
+          data-enlace={urlProyecto(foto.proyecto, idioma)}
+        >
+          <Foto imagen={foto.imagen} alt={foto.proyecto.titulo} sizes="100vw" prioridad={i === 0} />
+        </figure>
+      ))}
+      <button type="button" class="pase-zona anterior" aria-label={t.anterior} />
+      <button type="button" class="pase-zona siguiente" aria-label={t.siguiente} />
+      <div class="pase-info">
+        <a class="pase-titulo" href={urlProyecto(primera.proyecto, idioma)}>
+          {primera.proyecto.titulo}
+        </a>
+        <span class="pase-contador">1 / {fotos.length}</span>
+      </div>
+    </div>
+  )
+}
+
+<script>
+  const pase = document.querySelector<HTMLElement>('.inicio-pase');
+  if (pase) {
+    const diapositivas = [...pase.querySelectorAll<HTMLElement>('.pase-diapositiva')];
+    const titulo = pase.querySelector<HTMLAnchorElement>('.pase-titulo')!;
+    const contador = pase.querySelector<HTMLElement>('.pase-contador')!;
+    const movimientoReducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let actual = 0;
+    let temporizador: number | undefined;
+
+    const mostrar = (indice: number) => {
+      diapositivas[actual].classList.remove('activa');
+      actual = (indice + diapositivas.length) % diapositivas.length;
+      const diapositiva = diapositivas[actual];
+      diapositiva.classList.add('activa');
+      titulo.textContent = diapositiva.dataset.titulo ?? '';
+      titulo.href = diapositiva.dataset.enlace ?? '#';
+      contador.textContent = `${actual + 1} / ${diapositivas.length}`;
+    };
+
+    const programar = () => {
+      window.clearInterval(temporizador);
+      if (!movimientoReducido && diapositivas.length > 1) {
+        temporizador = window.setInterval(() => mostrar(actual + 1), 4500);
+      }
+    };
+
+    pase.querySelector('.pase-zona.anterior')?.addEventListener('click', () => {
+      mostrar(actual - 1);
+      programar();
+    });
+    pase.querySelector('.pase-zona.siguiente')?.addEventListener('click', () => {
+      mostrar(actual + 1);
+      programar();
+    });
+    document.addEventListener('keydown', (evento) => {
+      if (evento.key === 'ArrowLeft') {
+        mostrar(actual - 1);
+        programar();
+      }
+      if (evento.key === 'ArrowRight') {
+        mostrar(actual + 1);
+        programar();
+      }
+    });
+    programar();
+  }
+</script>

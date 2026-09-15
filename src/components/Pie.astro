@@ -1,0 +1,26 @@
+---
+import type { Idioma } from '../i18n/categorias';
+import { textos } from '../i18n/textos';
+import { ajustes } from '../lib/contenido';
+import { urlAvisoLegal, urlPrivacidad } from '../lib/rutas';
+
+interface Props {
+  idioma: Idioma;
+}
+
+const { idioma } = Astro.props;
+const t = textos[idioma];
+const año = new Date().getFullYear();
+---
+
+<footer class="pie">
+  <div>
+    <a href={`mailto:${ajustes.email}`}>{ajustes.email}</a>
+    <a href={`https://www.instagram.com/${ajustes.instagram}/`} target="_blank" rel="noopener">Instagram</a>
+  </div>
+  <div>
+    <span>© {año} {ajustes.nombre}</span>
+    <a href={urlAvisoLegal(idioma)}>{t.avisoLegal}</a>
+    <a href={urlPrivacidad(idioma)}>{t.privacidad}</a>
+  </div>
+</footer>

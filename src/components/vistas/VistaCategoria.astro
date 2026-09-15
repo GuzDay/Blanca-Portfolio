@@ -1,0 +1,45 @@
+---
+import Base from '../../layouts/Base.astro';
+import Foto from '../Foto.astro';
+import type { Categoria, Idioma } from '../../i18n/categorias';
+import { textos } from '../../i18n/textos';
+import { proyectosDe } from '../../lib/contenido';
+import { urlCategoria, urlProyecto } from '../../lib/rutas';
+
+interface Props {
+  idioma: Idioma;
+  categoria: Categoria;
+}
+
+const { idioma, categoria } = Astro.props;
+const t = textos[idioma];
+const lista = proyectosDe(categoria);
+---
+
+<Base
+  idioma={idioma}
+  alternativas={{ es: urlCategoria(categoria, 'es'), en: urlCategoria(categoria, 'en') }}
+  titulo={categoria.nombre[idioma]}
+  imagenSocial={lista[0]?.portada}
+  categoriaActiva={categoria.carpeta}
+>
+  <h1 class="visualmente-oculto">{categoria.nombre[idioma]}</h1>
+  {
+    lista.length === 0 ? (
+      <p class="vacio">{t.proximamente}</p>
+    ) : (
+      <ul class="rejilla">
+        {lista.map((proyecto, i) => (
+          <li>
+            <a href={urlProyecto(proyecto, idioma)}>
+              <div class="marco">
+                <Foto imagen={proyecto.portada} alt="" sizes="(min-width: 1000px) 33vw, 50vw" prioridad={i < 2} />
+              </div>
+              <span class="titulo">{proyecto.titulo}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</Base>

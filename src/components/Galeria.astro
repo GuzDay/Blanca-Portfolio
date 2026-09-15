@@ -1,0 +1,49 @@
+---
+// Galería de un proyecto con maquetación automática (ver src/lib/galeria.ts).
+import ElementoGaleria from './ElementoGaleria.astro';
+import Visor from './Visor.astro';
+import { agruparEnFilas } from '../lib/galeria';
+import type { Idioma } from '../i18n/categorias';
+import type { Proyecto } from '../lib/contenido';
+
+interface Props {
+  proyecto: Proyecto;
+  idioma: Idioma;
+}
+
+const { proyecto, idioma } = Astro.props;
+const filas = agruparEnFilas(proyecto.galeria);
+const fotos = proyecto.galeria.filter((e) => e.tipo === 'foto');
+---
+
+<div class="galeria">
+  {
+    filas.map((fila) =>
+      fila.tipo === 'pareja' ? (
+        <div class="fila pareja">
+          {fila.elementos.map((elemento) => (
+            <ElementoGaleria
+              elemento={elemento}
+              sizes="(min-width: 1440px) 700px, 50vw"
+              indice={fotos.indexOf(elemento)}
+              titulo={proyecto.titulo}
+              idioma={idioma}
+            />
+          ))}
+        </div>
+      ) : (
+        <div class:list={['fila', 'sola', fila.elemento.vertical && 'vertical']}>
+          <ElementoGaleria
+            elemento={fila.elemento}
+            sizes={fila.elemento.vertical ? '(min-width: 800px) 760px, 100vw' : '(min-width: 1440px) 1400px, 100vw'}
+            indice={fotos.indexOf(fila.elemento)}
+            titulo={proyecto.titulo}
+            idioma={idioma}
+          />
+        </div>
+      ),
+    )
+  }
+</div>
+
+{fotos.length > 0 && <Visor idioma={idioma} />}

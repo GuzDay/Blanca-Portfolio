@@ -1,0 +1,40 @@
+---
+// Home, variante "Una tras otra": fotos grandes que se suceden al hacer scroll.
+import Foto from '../Foto.astro';
+import type { Idioma } from '../../i18n/categorias';
+import type { FotoInicio } from '../../lib/contenido';
+import { urlProyecto } from '../../lib/rutas';
+
+interface Props {
+  fotos: FotoInicio[];
+  idioma: Idioma;
+}
+
+const { fotos, idioma } = Astro.props;
+let verticales = 0;
+const elementos = fotos.map((foto) => ({
+  ...foto,
+  lado: foto.vertical ? (verticales++ % 2 === 0 ? 'izquierda' : 'derecha') : undefined,
+}));
+---
+
+<div class="inicio-flujo">
+  {
+    elementos.map((foto, i) => (
+      <figure class:list={[foto.vertical ? 'vertical' : 'horizontal', foto.lado]}>
+        <a href={urlProyecto(foto.proyecto, idioma)}>
+          <Foto
+            imagen={foto.imagen}
+            alt={foto.proyecto.titulo}
+            sizes={foto.vertical ? '(min-width: 700px) 560px, 100vw' : '(min-width: 1260px) 1200px, 100vw'}
+            prioridad={i === 0}
+          />
+        </a>
+        <figcaption class="pie-foto">
+          <span>{foto.proyecto.titulo}</span>
+          <span>{foto.proyecto.categoria.nombre[idioma]}</span>
+        </figcaption>
+      </figure>
+    ))
+  }
+</div>

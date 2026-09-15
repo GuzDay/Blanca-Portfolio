@@ -1,0 +1,12 @@
+---
+import VistaCategoria from '../../components/vistas/VistaCategoria.astro';
+import { categorias } from '../../i18n/categorias';
+
+export function getStaticPaths() {
+  return categorias.map((categoria) => ({ params: { categoria: categoria.slug.es }, props: { categoria } }));
+}
+
+const { categoria } = Astro.props;
+---
+
+<VistaCategoria idioma="es" categoria={categoria} />

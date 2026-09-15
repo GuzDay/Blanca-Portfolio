@@ -1,0 +1,75 @@
+---
+// Visor a pantalla completa: flechas, teclado (← → Esc) y deslizar el dedo en móvil.
+import { textos } from '../i18n/textos';
+import type { Idioma } from '../i18n/categorias';
+
+interface Props {
+  idioma: Idioma;
+}
+
+const t = textos[Astro.props.idioma];
+---
+
+<dialog class="visor" aria-label={t.visor}>
+  <div class="visor-barra">
+    <span class="visor-contador" aria-live="polite"></span>
+    <button type="button" class="visor-cerrar">{t.cerrar}</button>
+  </div>
+  <div class="visor-escenario">
+    <img class="visor-imagen" alt="" />
+    <button type="button" class="visor-anterior" aria-label={t.anterior}><span aria-hidden="true">←</span></button>
+    <button type="button" class="visor-siguiente" aria-label={t.siguiente}><span aria-hidden="true">→</span></button>
+  </div>
+</dialog>
+
+<script>
+  const visor = document.querySelector<HTMLDialogElement>('.visor');
+  const botones = [...document.querySelectorAll<HTMLButtonElement>('.abrir-visor')];
+
+  if (visor && botones.length > 0) {
+    const imagen = visor.querySelector<HTMLImageElement>('.visor-imagen')!;
+    const contador = visor.querySelector<HTMLElement>('.visor-contador')!;
+    const escenario = visor.querySelector<HTMLElement>('.visor-escenario')!;
+    let actual = 0;
+
+    const mostrar = (indice: number) => {
+      actual = (indice + botones.length) % botones.length;
+      const origen = botones[actual].querySelector('img');
+      if (!origen) return;
+      imagen.sizes = '100vw';
+      imagen.srcset = origen.srcset;
+      imagen.src = origen.src;
+      imagen.alt = origen.alt;
+      contador.textContent = `${actual + 1} / ${botones.length}`;
+    };
+
+    botones.forEach((boton, indice) =>
+      boton.addEventListener('click', () => {
+        mostrar(indice);
+        visor.showModal();
+      }),
+    );
+
+    visor.querySelector('.visor-cerrar')?.addEventListener('click', () => visor.close());
+    visor.querySelector('.visor-anterior')?.addEventListener('click', () => mostrar(actual - 1));
+    visor.querySelector('.visor-siguiente')?.addEventListener('click', () => mostrar(actual + 1));
+    if (botones.length < 2) visor.classList.add('una-foto');
+
+    visor.addEventListener('keydown', (evento) => {
+      if (evento.key === 'ArrowLeft') mostrar(actual - 1);
+      if (evento.key === 'ArrowRight') mostrar(actual + 1);
+    });
+
+    // Deslizar con el dedo
+    let inicioX: number | null = null;
+    escenario.addEventListener('pointerdown', (evento) => {
+      inicioX = evento.clientX;
+    });
+    escenario.addEventListener('pointerup', (evento) => {
+      if (inicioX === null) return;
+      const distancia = evento.clientX - inicioX;
+      inicioX = null;
+      if (Math.abs(distancia) > 50) mostrar(distancia < 0 ? actual + 1 : actual - 1);
+    });
+  }
+</script>

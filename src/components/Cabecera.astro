@@ -1,0 +1,54 @@
+---
+// Cabecera: nombre, todas las categorías visibles (un clic) e idioma.
+import { categorias, type Idioma } from '../i18n/categorias';
+import { textos } from '../i18n/textos';
+import { ajustes } from '../lib/contenido';
+import { urlCategoria, urlInfo, urlInicio } from '../lib/rutas';
+
+interface Props {
+  idioma: Idioma;
+  alternativas: Record<Idioma, string>;
+  categoriaActiva?: string;
+  seccion?: 'info';
+}
+
+const { idioma, alternativas, categoriaActiva, seccion } = Astro.props;
+const t = textos[idioma];
+---
+
+<header class="cabecera">
+  <a class="marca" href={urlInicio(idioma)}>{ajustes.nombre}</a>
+  <nav class="menu" aria-label={t.menu}>
+    <ul>
+      {
+        categorias.map((categoria) => (
+          <li>
+            <a
+              href={urlCategoria(categoria, idioma)}
+              aria-current={categoriaActiva === categoria.carpeta ? 'true' : undefined}
+            >
+              {categoria.nombre[idioma]}
+            </a>
+          </li>
+        ))
+      }
+      <li>
+        <a href={urlInfo(idioma)} aria-current={seccion === 'info' ? 'true' : undefined}>{t.info}</a>
+      </li>
+    </ul>
+  </nav>
+  <div class="idiomas" aria-label={t.idiomas}>
+    <a href={alternativas.es} lang="es" hreflang="es" aria-current={idioma === 'es' ? 'true' : undefined}>ES</a>
+    <a href={alternativas.en} lang="en" hreflang="en" aria-current={idioma === 'en' ? 'true' : undefined}>EN</a>
+  </div>
+</header>
+
+<script>
+  // Guarda la altura de la cabecera en una variable CSS (la usa el pase de fotos de la Home)
+  const cabecera = document.querySelector<HTMLElement>('.cabecera');
+  if (cabecera) {
+    const actualizar = () =>
+      document.documentElement.style.setProperty('--alto-cabecera', `${cabecera.offsetHeight}px`);
+    new ResizeObserver(actualizar).observe(cabecera);
+  }
+</script>

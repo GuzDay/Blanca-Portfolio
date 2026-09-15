@@ -1,0 +1,45 @@
+---
+import Base from '../../layouts/Base.astro';
+import Galeria from '../Galeria.astro';
+import type { Idioma } from '../../i18n/categorias';
+import { textos } from '../../i18n/textos';
+import { siguienteProyecto, type Proyecto } from '../../lib/contenido';
+import { urlCategoria, urlProyecto } from '../../lib/rutas';
+
+interface Props {
+  idioma: Idioma;
+  proyecto: Proyecto;
+}
+
+const { idioma, proyecto } = Astro.props;
+const t = textos[idioma];
+const siguiente = siguienteProyecto(proyecto);
+---
+
+<Base
+  idioma={idioma}
+  alternativas={{ es: urlProyecto(proyecto, 'es'), en: urlProyecto(proyecto, 'en') }}
+  titulo={proyecto.titulo}
+  imagenSocial={proyecto.portada}
+  categoriaActiva={proyecto.categoria.carpeta}
+>
+  <article class="proyecto">
+    <header class="proyecto-cabecera">
+      <a class="volver" href={urlCategoria(proyecto.categoria, idioma)}>{proyecto.categoria.nombre[idioma]}</a>
+      <h1>{proyecto.titulo}</h1>
+    </header>
+
+    <Galeria proyecto={proyecto} idioma={idioma} />
+
+    {
+      siguiente && (
+        <nav class="siguiente-proyecto">
+          <a href={urlProyecto(siguiente, idioma)}>
+            <span class="etiqueta">{t.siguienteProyecto}</span>
+            <span class="titulo">{siguiente.titulo} →</span>
+          </a>
+        </nav>
+      )
+    }
+  </article>
+</Base>
