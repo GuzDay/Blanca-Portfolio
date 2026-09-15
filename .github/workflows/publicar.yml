@@ -1,0 +1,45 @@
+# Publica la web en GitHub Pages cada vez que se sube un cambio a main.
+# El progreso se ve en la pestaña "Actions" del repositorio.
+name: Publicar web
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # permite publicar a mano desde la pestaña Actions
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el proyecto
+        uses: actions/checkout@v7
+
+      - name: Revisar archivos, construir la web y prepararla
+        uses: withastro/action@v6
+        with:
+          node-version: 24
+        env:
+          SITIO: https://guzday.github.io
+          RUTA_BASE: /Blanca-Portfolio
+          # Versión de prueba: pide a Google que no la indexe. Quitar al conectar blancagtarrio.com
+          PUBLIC_SIN_INDEXAR: 'true'
+
+  publicar:
+    needs: construir
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.publicacion.outputs.page_url }}
+    steps:
+      - name: Publicar en GitHub Pages
+        id: publicacion
+        uses: actions/deploy-pages@v5

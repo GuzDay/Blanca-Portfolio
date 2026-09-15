@@ -9,9 +9,9 @@ import { categorias } from '../src/i18n/categorias.ts';
 
 const CONTENIDO = fileURLToPath(new URL('../contenido/', import.meta.url));
 const MB = 1024 * 1024;
-const LIMITE_ARCHIVO = 25 * MB; // máximo por archivo que acepta Cloudflare
+const LIMITE_ARCHIVO = 50 * MB; // GitHub avisa a partir de 50 MB y rechaza archivos de más de 100 MB
 const AVISO_FOTO = 3 * MB;
-const AVISO_TOTAL = 1500 * MB;
+const AVISO_TOTAL = 350 * MB; // la web publicada ocupa ~3 veces las fotos, y GitHub Pages permite 1 GB
 
 const FOTOS = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 const VIDEOS = new Set(['.mp4', '.webm']);
@@ -114,7 +114,7 @@ for (const categoria of listar(carpetaProyectos)) {
 
       if (info.size > LIMITE_ARCHIVO) {
         errores.push(
-          `${ruta}/${archivo}: pesa ${mb(info.size)} y el máximo es 25 MB. ${VIDEOS.has(extension) ? 'Comprímelo con HandBrake (1080p o 720p).' : 'Expórtalo más pequeño.'}`,
+          `${ruta}/${archivo}: pesa ${mb(info.size)} y el máximo es 50 MB. ${VIDEOS.has(extension) ? 'Comprímelo con HandBrake (1080p o 720p).' : 'Expórtalo más pequeño.'}`,
         );
       }
       if (FOTOS.has(extension)) {
@@ -185,7 +185,7 @@ for (const [idioma, nombre] of [
 }
 
 if (pesoTotal > AVISO_TOTAL) {
-  avisos.push(`Las fotos y vídeos ocupan ${mb(pesoTotal)}. Conviene no pasar de ~1,5 GB en GitHub.`);
+  avisos.push(`Las fotos y vídeos ocupan ${mb(pesoTotal)}. La web publicada podría acercarse a 1 GB, el máximo de GitHub Pages.`);
 }
 
 // ---------- Resultado ----------

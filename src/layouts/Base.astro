@@ -6,6 +6,7 @@ import { getImage } from 'astro:assets';
 import Cabecera from '../components/Cabecera.astro';
 import Pie from '../components/Pie.astro';
 import { ajustes } from '../lib/contenido';
+import { conBase } from '../lib/rutas';
 import { textos } from '../i18n/textos';
 import type { Idioma } from '../i18n/categorias';
 
@@ -33,6 +34,9 @@ const {
   noIndex = false,
 } = Astro.props;
 
+// En la versión de prueba (GitHub Pages) se pide a Google que no la indexe
+const sinIndexar = noIndex || import.meta.env.PUBLIC_SIN_INDEXAR === 'true';
+
 const t = textos[idioma];
 const tituloCompleto = titulo ? `${titulo} — ${ajustes.nombre}` : `${ajustes.nombre} — ${t.profesion}`;
 const absoluta = (ruta: string) => new URL(ruta, Astro.site).href;
@@ -44,7 +48,7 @@ const persona = {
   '@type': 'Person',
   name: ajustes.nombre,
   jobTitle: t.profesionPersona,
-  url: Astro.site?.href,
+  url: absoluta(conBase('/')),
   sameAs: [`https://www.instagram.com/${ajustes.instagram}/`],
 };
 ---
@@ -60,7 +64,7 @@ const persona = {
     <link rel="alternate" hreflang="es" href={absoluta(alternativas.es)} />
     <link rel="alternate" hreflang="en" href={absoluta(alternativas.en)} />
     <link rel="alternate" hreflang="x-default" href={absoluta(alternativas.es)} />
-    {noIndex && <meta name="robots" content="noindex" />}
+    {sinIndexar && <meta name="robots" content="noindex" />}
     <meta property="og:type" content="website" />
     <meta property="og:title" content={tituloCompleto} />
     <meta property="og:description" content={descripcion} />
@@ -68,8 +72,8 @@ const persona = {
     <meta property="og:locale" content={idioma === 'es' ? 'es_ES' : 'en_US'} />
     {imagenCompartir && <meta property="og:image" content={absoluta(imagenCompartir.src)} />}
     <meta name="twitter:card" content="summary_large_image" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="sitemap" href="/sitemap.xml" />
+    <link rel="icon" href={conBase('/favicon.svg')} type="image/svg+xml" />
+    <link rel="sitemap" href={conBase('/sitemap.xml')} />
     {datosEstructurados && <script is:inline type="application/ld+json" set:html={JSON.stringify(persona)} />}
   </head>
   <body>
