@@ -11,7 +11,7 @@
   --margen: clamp(1rem, 3vw, 2.5rem); /* margen lateral de la página */
   --hueco: clamp(0.5rem, 1.2vw, 1.25rem); /* separación entre fotos */
   --ancho-max: 1440px;
-  --fuente: 'Inter Tight Variable', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --fuente: 'Geist Variable', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
 }
 
 /* ---------- Base ---------- */
@@ -35,6 +35,7 @@ body {
   color: var(--texto);
   font-family: var(--fuente);
   font-size: 0.9375rem;
+  font-weight: 300; /* Geist en fino: es el peso que se usa en toda la web */
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
@@ -131,7 +132,7 @@ figure {
 
 .marca {
   font-size: 0.8125rem;
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -402,7 +403,7 @@ figure {
 .proyecto-cabecera h1 {
   margin: 0.25rem 0 0;
   font-size: clamp(1.25rem, 2.2vw, 1.75rem);
-  font-weight: 400;
+  font-weight: 300;
   letter-spacing: -0.01em;
 }
 
@@ -640,7 +641,7 @@ html:has(.visor[open]) {
 .contacto-datos h2 {
   margin: 0 0 0.5rem;
   font-size: 0.75rem;
-  font-weight: 400;
+  font-weight: 300;
   color: var(--gris);
 }
 
@@ -664,13 +665,13 @@ html:has(.visor[open]) {
 
 .texto-legal h1 {
   font-size: 1.5rem;
-  font-weight: 400;
+  font-weight: 300;
 }
 
 .texto-legal h2 {
   margin-top: 2rem;
   font-size: 0.9375rem;
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .texto-legal a {
@@ -686,7 +687,7 @@ html:has(.visor[open]) {
 .error-404 h1 {
   margin: 0;
   font-size: 1.5rem;
-  font-weight: 400;
+  font-weight: 300;
 }
 
 .error-404 .enlaces {
@@ -706,8 +707,8 @@ html:has(.visor[open]) {
   /* Cambia este color a #0d0d0d para probar la portada sobre fondo oscuro */
   --fondo-espiral: var(--fondo);
   --vuelta: 120s; /* lo que tarda en dar una vuelta entera */
-  --foto: 1.5vmin; /* tamaño de las fotos */
-  --radio: 1.2vmin; /* cuánto se separan del centro */
+  --foto: 1.25vmin; /* tamaño de las fotos */
+  --radio: 1.55vmin; /* cuánto se separan del centro */
 
   position: relative;
   /* A pantalla completa: se sale del margen y del aire que deja la página */
@@ -744,7 +745,7 @@ body:has(.inicio-espiral) .cabecera {
   margin: 0;
   padding-left: 0.3em; /* compensa el espacio que deja la última letra */
   font-size: clamp(0.8rem, 3.2vw, 1.75rem);
-  font-weight: 500;
+  font-weight: 300;
   text-transform: uppercase;
   white-space: nowrap;
   pointer-events: none;
@@ -876,7 +877,7 @@ body:has(.inicio-espiral) .cabecera {
 @media (max-width: 700px) {
   .inicio-espiral {
     --vuelta: 150s;
-    --foto: 3.1vmin;
-    --radio: 1.8vmin;
+    --foto: 2.2vmin;
+    --radio: 2.1vmin;
   }
 }
