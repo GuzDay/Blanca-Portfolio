@@ -4,7 +4,7 @@ import VistaInicio, { type VarianteInicio } from '../../components/vistas/VistaI
 import { conBase } from '../../lib/rutas';
 
 export function getStaticPaths() {
-  const variantes: VarianteInicio[] = ['una-tras-otra', 'mosaico', 'pase'];
+  const variantes: VarianteInicio[] = ['una-tras-otra', 'mosaico', 'pase', 'espiral'];
   return variantes.map((variante) => ({ params: { variante }, props: { variante } }));
 }
 

@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import InicioFlujo from '../inicio/InicioFlujo.astro';
+import InicioEspiral from '../inicio/InicioEspiral.astro';
 import InicioMosaico from '../inicio/InicioMosaico.astro';
 import InicioPase from '../inicio/InicioPase.astro';
 import type { Idioma } from '../../i18n/categorias';
@@ -8,10 +9,10 @@ import { textos } from '../../i18n/textos';
 import { ajustes, fotosInicio } from '../../lib/contenido';
 import { urlInicio } from '../../lib/rutas';
 
-export type VarianteInicio = 'una-tras-otra' | 'mosaico' | 'pase';
+export type VarianteInicio = 'una-tras-otra' | 'mosaico' | 'pase' | 'espiral';
 
 // ⬇️ Variante que se usa en la Home de verdad (cuando elijáis, se borran las otras)
-const VARIANTE_ELEGIDA: VarianteInicio = 'una-tras-otra';
+const VARIANTE_ELEGIDA: VarianteInicio = 'espiral';
 
 interface Props {
   idioma: Idioma;
@@ -27,7 +28,7 @@ const {
   noIndex = false,
 } = Astro.props;
 const t = textos[idioma];
-const componentes = { 'una-tras-otra': InicioFlujo, mosaico: InicioMosaico, pase: InicioPase };
+const componentes = { 'una-tras-otra': InicioFlujo, mosaico: InicioMosaico, pase: InicioPase, espiral: InicioEspiral };
 const Componente = componentes[variante];
 ---
 

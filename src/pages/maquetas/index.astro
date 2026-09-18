@@ -9,11 +9,15 @@ const ruta = conBase('/maquetas/');
 <Base idioma="es" alternativas={{ es: ruta, en: ruta }} titulo="Maquetas de la Home" noIndex>
   <div class="texto-legal">
     <h1>Maquetas de la Home</h1>
-    <p>Tres formas de mostrar la selección de mejores fotos. Elegid una y se borran las demás.</p>
+    <p>Cuatro formas de mostrar la selección de mejores fotos. Elegid una y se borran las demás.</p>
     <ol>
       <li><a href={conBase('/maquetas/una-tras-otra/')}>Una tras otra</a>: fotos grandes que se suceden al hacer scroll.</li>
       <li><a href={conBase('/maquetas/mosaico/')}>Mosaico</a>: columnas con fotos de distintos tamaños.</li>
       <li><a href={conBase('/maquetas/pase/')}>Pase</a>: una foto cada vez ocupando la pantalla; cambia sola.</li>
+      <li>
+        <a href={conBase('/maquetas/espiral/')}>Espiral</a>: las fotos aparecen una tras otra formando una espiral y el
+        conjunto gira despacio.
+      </li>
     </ol>
   </div>
 </Base>

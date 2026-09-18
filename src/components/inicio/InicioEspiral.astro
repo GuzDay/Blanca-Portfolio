@@ -1,0 +1,76 @@
+---
+// Home, variante "Espiral": las fotos aparecen una tras otra formando una espiral
+// y después el conjunto gira despacio. Las fotos no se inclinan: el grupo gira y
+// cada foto gira al revés a la vez, así que siempre se ven rectas.
+import Foto from '../Foto.astro';
+import type { Idioma } from '../../i18n/categorias';
+import { ajustes } from '../../lib/contenido';
+import type { FotoInicio } from '../../lib/contenido';
+import { urlProyecto } from '../../lib/rutas';
+
+interface Props {
+  fotos: FotoInicio[];
+  idioma: Idioma;
+}
+
+const { fotos, idioma } = Astro.props;
+
+// Ángulo áureo: reparte las fotos alrededor del centro sin que se alineen nunca.
+const ANGULO = 137.5;
+const SEPARACION = 9; // a más valor, espiral más abierta
+// Ojo: las fotos empiezan cuando el nombre se está apagando.
+// Si cambias este valor, ajusta también la entrada del nombre en global.css.
+const ESPERA = 2100; // lo que tarda en empezar la primera foto (ms)
+const CADENCIA = 140; // tiempo entre una foto y la siguiente (ms)
+
+const piezas = fotos.map((foto, i) => {
+  const angulo = (i * ANGULO * Math.PI) / 180;
+  const radio = SEPARACION * Math.sqrt(i + 0.6);
+  return {
+    foto,
+    x: (Math.cos(angulo) * radio).toFixed(2),
+    y: (Math.sin(angulo) * radio).toFixed(2),
+    ancho: foto.vertical ? 15 : 21, // las verticales, más estrechas
+    retraso: ESPERA + i * CADENCIA,
+  };
+});
+---
+
+<div class="inicio-espiral">
+  <p class="espiral-nombre" aria-hidden="true">{ajustes.nombre}</p>
+  <div class="espiral-giro">
+    {
+      piezas.map(({ foto, x, y, ancho, retraso }, i) => (
+        <figure
+          class="espiral-pieza"
+          style={`--x:${x}; --y:${y}; --ancho:${ancho}; --retraso:${retraso}ms`}
+        >
+          <div class="espiral-contragiro">
+            <a href={urlProyecto(foto.proyecto, idioma)}>
+              <Foto
+                imagen={foto.imagen}
+                alt={foto.proyecto.titulo}
+                sizes="(max-width: 700px) 70vw, 32vw"
+                prioridad={i < 4}
+              />
+              <figcaption class="pie-foto">{foto.proyecto.titulo}</figcaption>
+            </a>
+          </div>
+        </figure>
+      ))
+    }
+  </div>
+</div>
+
+<script>
+  // Mide la cabecera para que la espiral ocupe justo el resto de la pantalla,
+  // sin dejar franja en blanco ni provocar scroll (en móvil la cabecera es más alta).
+  const medirCabecera = () => {
+    const cabecera = document.querySelector<HTMLElement>('.cabecera');
+    if (cabecera) {
+      document.documentElement.style.setProperty('--alto-cabecera', `${cabecera.offsetHeight}px`);
+    }
+  };
+  medirCabecera();
+  window.addEventListener('resize', medirCabecera);
+</script>
