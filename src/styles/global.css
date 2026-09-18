@@ -604,7 +604,7 @@ html:has(.visor[open]) {
 
 /* ---------- Info ---------- */
 
-.info {
+.contacto {
   display: grid;
   grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
   gap: clamp(2rem, 6vw, 6rem);
@@ -614,43 +614,43 @@ html:has(.visor[open]) {
 }
 
 @media (max-width: 760px) {
-  .info {
+  .contacto {
     grid-template-columns: 1fr;
   }
 }
 
-.info-retrato img {
+.contacto-retrato img {
   width: 100%;
 }
 
-.info-bio {
+.contacto-bio {
   max-width: 34em;
   font-size: 1.0625rem;
   line-height: 1.6;
 }
 
-.info-bio p {
+.contacto-bio p {
   margin: 0 0 1em;
 }
 
-.info-contacto {
+.contacto-datos {
   margin-top: 2.5rem;
 }
 
-.info-contacto h2 {
+.contacto-datos h2 {
   margin: 0 0 0.5rem;
   font-size: 0.75rem;
   font-weight: 400;
   color: var(--gris);
 }
 
-.info-contacto ul {
+.contacto-datos ul {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.info-contacto a:hover {
+.contacto-datos a:hover {
   text-decoration: underline;
   text-underline-offset: 0.2em;
 }

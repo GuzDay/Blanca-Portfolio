@@ -3,13 +3,13 @@
 import { categorias, type Idioma } from '../i18n/categorias';
 import { textos } from '../i18n/textos';
 import { ajustes } from '../lib/contenido';
-import { urlCategoria, urlInfo, urlInicio } from '../lib/rutas';
+import { urlCategoria, urlContacto, urlInicio } from '../lib/rutas';
 
 interface Props {
   idioma: Idioma;
   alternativas: Record<Idioma, string>;
   categoriaActiva?: string;
-  seccion?: 'info';
+  seccion?: 'contacto';
 }
 
 const { idioma, alternativas, categoriaActiva, seccion } = Astro.props;
@@ -33,7 +33,7 @@ const t = textos[idioma];
         ))
       }
       <li>
-        <a href={urlInfo(idioma)} aria-current={seccion === 'info' ? 'true' : undefined}>{t.info}</a>
+        <a href={urlContacto(idioma)} aria-current={seccion === 'contacto' ? 'true' : undefined}>{t.contacto}</a>
       </li>
     </ul>
   </nav>

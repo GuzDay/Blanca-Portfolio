@@ -1,17 +1,20 @@
 # Fotos que salen en la página de inicio, en este orden.
 # Cada línea es: categoría/proyecto/archivo  (tal como están las carpetas dentro de contenido/proyectos)
 # Al pulsar una foto se abre su proyecto.
+#
+# Selección provisional para ver cómo queda la espiral: dos fotos de cada
+# categoría, mezclando verticales y apaisadas. Cámbialas por las que queráis.
 
 fotos:
-  - moda/ejemplo-moda-1/03.jpg
-  - musica/ejemplo-musica-1/02.jpg
-  - interiorismo/ejemplo-interiorismo-1/01.jpg
-  - personal/ejemplo-personal-1/03.jpg
-  - eventos/ejemplo-eventos-1/01.jpg
-  - moda/ejemplo-moda-1/01.jpg
-  - foto-fija/ejemplo-foto-fija-1/01.jpg
-  - personal/ejemplo-personal-2/01.jpg
-  - interiorismo/ejemplo-interiorismo-2/02.jpg
-  - musica/ejemplo-musica-1/05.jpg
-  - moda/ejemplo-moda-2/02.jpg
-  - personal/ejemplo-personal-1/05.jpg
+  - moda/seleccion/01.jpg
+  - interiorismo/seleccion/03.jpg
+  - musica/seleccion/01.jpg
+  - viajes/seleccion/07.jpg
+  - eventos/seleccion/05.jpg
+  - foto-fija/seleccion/01.jpg
+  - moda/seleccion/10.jpg
+  - viajes/seleccion/02.jpg
+  - interiorismo/seleccion/09.jpg
+  - musica/seleccion/05.jpg
+  - eventos/seleccion/01.jpg
+  - viajes/seleccion/13.jpg

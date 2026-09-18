@@ -12,6 +12,6 @@ export const urlInicio = (idioma: Idioma) => `${prefijo(idioma)}/`;
 export const urlCategoria = (categoria: Categoria, idioma: Idioma) => `${prefijo(idioma)}/${categoria.slug[idioma]}/`;
 export const urlProyecto = (proyecto: Proyecto, idioma: Idioma) =>
   `${prefijo(idioma)}/${proyecto.categoria.slug[idioma]}/${proyecto.slug}/`;
-export const urlInfo = (idioma: Idioma) => `${prefijo(idioma)}/info/`;
+export const urlContacto = (idioma: Idioma) => conBase(idioma === 'en' ? '/en/contact/' : '/contacto/');
 export const urlAvisoLegal = (idioma: Idioma) => conBase(idioma === 'en' ? '/en/legal-notice/' : '/aviso-legal/');
 export const urlPrivacidad = (idioma: Idioma) => conBase(idioma === 'en' ? '/en/privacy/' : '/privacidad/');

@@ -2,7 +2,7 @@
 import type { APIRoute } from 'astro';
 import { categorias, type Idioma } from '../i18n/categorias';
 import { proyectos } from '../lib/contenido';
-import { urlAvisoLegal, urlCategoria, urlInfo, urlInicio, urlPrivacidad, urlProyecto } from '../lib/rutas';
+import { urlAvisoLegal, urlCategoria, urlContacto, urlInicio, urlPrivacidad, urlProyecto } from '../lib/rutas';
 
 export const GET: APIRoute = ({ site }) => {
   const idiomas: Idioma[] = ['es', 'en'];
@@ -10,7 +10,7 @@ export const GET: APIRoute = ({ site }) => {
     urlInicio(idioma),
     ...categorias.map((categoria) => urlCategoria(categoria, idioma)),
     ...proyectos.map((proyecto) => urlProyecto(proyecto, idioma)),
-    urlInfo(idioma),
+    urlContacto(idioma),
     urlAvisoLegal(idioma),
     urlPrivacidad(idioma),
   ]);

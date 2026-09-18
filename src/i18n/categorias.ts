@@ -16,5 +16,5 @@ export const categorias: Categoria[] = [
   { carpeta: 'eventos', slug: { es: 'eventos', en: 'events' }, nombre: { es: 'Eventos', en: 'Events' } },
   { carpeta: 'foto-fija', slug: { es: 'foto-fija', en: 'film-stills' }, nombre: { es: 'Foto fija', en: 'Film stills' } },
   { carpeta: 'musica', slug: { es: 'musica', en: 'music' }, nombre: { es: 'Música', en: 'Music' } },
-  { carpeta: 'personal', slug: { es: 'personal', en: 'personal' }, nombre: { es: 'Personal', en: 'Personal' } },
+  { carpeta: 'viajes', slug: { es: 'viajes', en: 'travel' }, nombre: { es: 'Viajes', en: 'Travel' } },
 ];

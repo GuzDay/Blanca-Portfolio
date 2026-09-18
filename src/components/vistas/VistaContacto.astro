@@ -4,7 +4,7 @@ import Foto from '../Foto.astro';
 import type { Idioma } from '../../i18n/categorias';
 import { textos } from '../../i18n/textos';
 import { ajustes, bioDe, retrato } from '../../lib/contenido';
-import { urlInfo } from '../../lib/rutas';
+import { urlContacto } from '../../lib/rutas';
 
 interface Props {
   idioma: Idioma;
@@ -17,30 +17,30 @@ const Bio = bioDe(idioma);
 
 <Base
   idioma={idioma}
-  alternativas={{ es: urlInfo('es'), en: urlInfo('en') }}
-  titulo={t.info}
+  alternativas={{ es: urlContacto('es'), en: urlContacto('en') }}
+  titulo={t.contacto}
   imagenSocial={retrato}
-  seccion="info"
+  seccion="contacto"
   datosEstructurados
 >
-  <div class="info">
+  <div class="contacto">
     {
       retrato && (
-        <div class="info-retrato">
+        <div class="contacto-retrato">
           <Foto imagen={retrato} alt={ajustes.nombre} sizes="(min-width: 760px) 40vw, 100vw" prioridad />
         </div>
       )
     }
-    <div class="info-texto">
-      <h1 class="visualmente-oculto">{t.info}</h1>
+    <div class="contacto-texto">
+      <h1 class="visualmente-oculto">{t.contacto}</h1>
       {
         Bio && (
-          <div class="info-bio">
+          <div class="contacto-bio">
             <Bio />
           </div>
         )
       }
-      <div class="info-contacto">
+      <div class="contacto-datos">
         <h2>{t.contacto}</h2>
         <ul>
           <li><a href={`mailto:${ajustes.email}`}>{ajustes.email}</a></li>
