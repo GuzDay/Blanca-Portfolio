@@ -1,19 +1,21 @@
 ---
-// Galería de un proyecto con maquetación automática (ver src/lib/galeria.ts).
+// Galería con maquetación automática (ver src/lib/galeria.ts).
+// Sirve tanto para un proyecto como para una categoría entera.
 import ElementoGaleria from './ElementoGaleria.astro';
 import Visor from './Visor.astro';
 import { agruparEnFilas } from '../lib/galeria';
 import type { Idioma } from '../i18n/categorias';
-import type { Proyecto } from '../lib/contenido';
+import type { Elemento } from '../lib/contenido';
 
 interface Props {
-  proyecto: Proyecto;
+  elementos: Elemento[];
+  titulo: string; // para el texto alternativo de las fotos
   idioma: Idioma;
 }
 
-const { proyecto, idioma } = Astro.props;
-const filas = agruparEnFilas(proyecto.galeria);
-const fotos = proyecto.galeria.filter((e) => e.tipo === 'foto');
+const { elementos, titulo, idioma } = Astro.props;
+const filas = agruparEnFilas(elementos);
+const fotos = elementos.filter((e) => e.tipo === 'foto');
 ---
 
 <div class="galeria">
@@ -26,7 +28,7 @@ const fotos = proyecto.galeria.filter((e) => e.tipo === 'foto');
               elemento={elemento}
               sizes="(min-width: 1440px) 700px, 50vw"
               indice={fotos.indexOf(elemento)}
-              titulo={proyecto.titulo}
+              titulo={titulo}
               idioma={idioma}
             />
           ))}
@@ -37,7 +39,7 @@ const fotos = proyecto.galeria.filter((e) => e.tipo === 'foto');
             elemento={fila.elemento}
             sizes={fila.elemento.vertical ? '(min-width: 800px) 760px, 100vw' : '(min-width: 1440px) 1400px, 100vw'}
             indice={fotos.indexOf(fila.elemento)}
-            titulo={proyecto.titulo}
+            titulo={titulo}
             idioma={idioma}
           />
         </div>

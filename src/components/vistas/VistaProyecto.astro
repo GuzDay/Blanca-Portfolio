@@ -29,7 +29,7 @@ const siguiente = siguienteProyecto(proyecto);
       <h1>{proyecto.titulo}</h1>
     </header>
 
-    <Galeria proyecto={proyecto} idioma={idioma} />
+    <Galeria elementos={proyecto.galeria} titulo={proyecto.titulo} idioma={idioma} />
 
     {
       siguiente && (

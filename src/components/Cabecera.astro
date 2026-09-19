@@ -17,12 +17,24 @@ const t = textos[idioma];
 ---
 
 <header class="cabecera">
+  <div class="cabecera-cristal" aria-hidden="true"></div>
   <a class="marca" href={urlInicio(idioma)}>{ajustes.nombre}</a>
-  <nav class="menu" aria-label={t.menu}>
+  <button
+    class="menu-boton"
+    type="button"
+    aria-expanded="false"
+    aria-controls="menu-principal"
+    aria-label={t.abrirMenu}
+    data-abrir={t.abrirMenu}
+    data-cerrar={t.cerrarMenu}
+  >
+    <span class="menu-icono" aria-hidden="true"></span>
+  </button>
+  <nav class="menu" id="menu-principal" aria-label={t.menu}>
     <ul>
       {
-        categorias.map((categoria) => (
-          <li>
+        categorias.map((categoria, i) => (
+          <li style={`--i:${i}; --j:${categorias.length - i}`}>
             <a
               href={urlCategoria(categoria, idioma)}
               aria-current={categoriaActiva === categoria.carpeta ? 'true' : undefined}
@@ -32,7 +44,7 @@ const t = textos[idioma];
           </li>
         ))
       }
-      <li>
+      <li style={`--i:${categorias.length}; --j:0`}>
         <a href={urlContacto(idioma)} aria-current={seccion === 'contacto' ? 'true' : undefined}>{t.contacto}</a>
       </li>
     </ul>
@@ -44,11 +56,52 @@ const t = textos[idioma];
 </header>
 
 <script>
-  // Guarda la altura de la cabecera en una variable CSS (la usa el pase de fotos de la Home)
+  // Guarda la altura de la cabecera en una variable CSS (la usa la portada)
   const cabecera = document.querySelector<HTMLElement>('.cabecera');
   if (cabecera) {
     const actualizar = () =>
       document.documentElement.style.setProperty('--alto-cabecera', `${cabecera.offsetHeight}px`);
     new ResizeObserver(actualizar).observe(cabecera);
+  }
+
+  // Menú hamburguesa (solo se ve en móvil)
+  const boton = document.querySelector<HTMLButtonElement>('.menu-boton');
+  if (cabecera && boton) {
+    const panel = cabecera.querySelector<HTMLElement>('.menu');
+
+    const mostrar = (abierto: boolean) => {
+      if (abierto) {
+        cabecera.classList.remove('menu-cerrando');
+        cabecera.classList.add('menu-abierto');
+      } else if (cabecera.classList.contains('menu-abierto')) {
+        // Se repliega con la misma animación al revés y se oculta al terminar
+        cabecera.classList.remove('menu-abierto');
+        cabecera.classList.add('menu-cerrando');
+        const terminar = () => {
+          cabecera.classList.remove('menu-cerrando');
+          panel?.removeEventListener('animationend', alTerminar);
+        };
+        // Ojo: las secciones también avisan al acabar y su aviso pasa por el panel,
+        // así que hay que quedarse solo con el del propio panel.
+        const alTerminar = (evento: AnimationEvent) => {
+          if (evento.target === panel) terminar();
+        };
+        panel?.addEventListener('animationend', alTerminar);
+        window.setTimeout(terminar, 800); // por si la animación no avisa
+      }
+      boton.setAttribute('aria-expanded', String(abierto));
+      boton.setAttribute('aria-label', (abierto ? boton.dataset.cerrar : boton.dataset.abrir) ?? '');
+    };
+
+    boton.addEventListener('click', () => mostrar(!cabecera.classList.contains('menu-abierto')));
+
+    // Se cierra al tocar fuera, con Escape, y si la ventana se hace grande
+    document.addEventListener('click', (evento) => {
+      if (!cabecera.contains(evento.target as Node)) mostrar(false);
+    });
+    document.addEventListener('keydown', (evento) => {
+      if (evento.key === 'Escape') mostrar(false);
+    });
+    matchMedia('(min-width: 901px)').addEventListener('change', () => mostrar(false));
   }
 </script>

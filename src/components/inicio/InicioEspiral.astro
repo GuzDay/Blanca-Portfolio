@@ -6,7 +6,7 @@ import Foto from '../Foto.astro';
 import type { Idioma } from '../../i18n/categorias';
 import { ajustes } from '../../lib/contenido';
 import type { FotoInicio } from '../../lib/contenido';
-import { urlProyecto } from '../../lib/rutas';
+import { urlCategoria } from '../../lib/rutas';
 
 interface Props {
   fotos: FotoInicio[];
@@ -18,42 +18,61 @@ const { fotos, idioma } = Astro.props;
 // Ángulo áureo: reparte las fotos alrededor del centro sin que se alineen nunca.
 const ANGULO = 137.5;
 const SEPARACION = 9; // a más valor, espiral más abierta
-// Ojo: las fotos empiezan cuando el nombre se está apagando.
-// Si cambias este valor, ajusta también la entrada del nombre en global.css.
-const ESPERA = 2100; // lo que tarda en empezar la primera foto (ms)
-const CADENCIA = 140; // tiempo entre una foto y la siguiente (ms)
+// Cuánto se espera antes de la primera foto está en global.css (--espera-portada),
+// porque depende de si se ve o no la presentación con el nombre.
+const CADENCIA = 55; // tiempo entre una foto y la siguiente (ms)
 
-const piezas = fotos.map((foto, i) => {
-  const angulo = (i * ANGULO * Math.PI) / 180;
+// Cada foto se coloca en su sitio de la espiral...
+const colocadas = fotos.map((foto, i) => {
+  const grados = (i * ANGULO) % 360;
+  const angulo = (grados * Math.PI) / 180;
   const radio = SEPARACION * Math.sqrt(i + 0.6);
   return {
     foto,
+    // Para el orden de aparición: 0 = arriba, y de ahí en el sentido del reloj
+    vuelta: (grados + 90) % 360,
     x: (Math.cos(angulo) * radio).toFixed(2),
     y: (Math.sin(angulo) * radio).toFixed(2),
     ancho: foto.vertical ? 15 : 21, // las verticales, más estrechas
-    retraso: ESPERA + i * CADENCIA,
   };
 });
+
+// ...pero aparecen dando la vuelta al círculo, cada una al lado de la anterior
+const giro = [...colocadas].sort((a, b) => a.vuelta - b.vuelta);
+const piezas = colocadas.map((pieza) => ({
+  ...pieza,
+  escalon: giro.indexOf(pieza) * CADENCIA, // su turno dentro de la vuelta
+}));
 ---
+
+<script is:inline>
+  // La presentación con el nombre se ve al entrar en la web desde fuera y al recargar.
+  // Si vienes de otra página de la propia web, se salta y las fotos entran enseguida.
+  var deDentro = document.referrer && document.referrer.indexOf(location.origin + '/') === 0;
+  var recarga = performance.getEntriesByType('navigation')[0];
+  if (!deDentro || (recarga && recarga.type === 'reload')) {
+    document.documentElement.classList.add('con-presentacion');
+  }
+</script>
 
 <div class="inicio-espiral">
   <p class="espiral-nombre" aria-hidden="true">{ajustes.nombre}</p>
   <div class="espiral-giro">
     {
-      piezas.map(({ foto, x, y, ancho, retraso }, i) => (
+      piezas.map(({ foto, x, y, ancho, escalon }, i) => (
         <figure
           class="espiral-pieza"
-          style={`--x:${x}; --y:${y}; --ancho:${ancho}; --retraso:${retraso}ms`}
+          style={`--x:${x}; --y:${y}; --ancho:${ancho}; --escalon:${escalon}ms`}
         >
           <div class="espiral-contragiro">
-            <a href={urlProyecto(foto.proyecto, idioma)}>
+            <a href={urlCategoria(foto.proyecto.categoria, idioma)}>
               <Foto
                 imagen={foto.imagen}
-                alt={foto.proyecto.titulo}
+                alt={foto.proyecto.categoria.nombre[idioma]}
                 sizes="(max-width: 700px) 70vw, 32vw"
                 prioridad={i < 4}
               />
-              <figcaption class="pie-foto">{foto.proyecto.titulo}</figcaption>
+              <figcaption class="pie-foto">{foto.proyecto.categoria.nombre[idioma]}</figcaption>
             </a>
           </div>
         </figure>

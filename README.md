@@ -1,4 +1,4 @@
-# Portfolio de Blanca G. Tarrio
+# Portfolio de Blanca G. Tarrío
 
 Web portfolio de Blanca. Hecha con [Astro](https://astro.build): una web estática, rápida, en español e inglés, donde las fotos y los vídeos están dentro del propio proyecto.
 

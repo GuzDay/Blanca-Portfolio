@@ -17,8 +17,12 @@ const t = textos[Astro.props.idioma];
   </div>
   <div class="visor-escenario">
     <img class="visor-imagen" alt="" />
-    <button type="button" class="visor-anterior" aria-label={t.anterior}><span aria-hidden="true">←</span></button>
-    <button type="button" class="visor-siguiente" aria-label={t.siguiente}><span aria-hidden="true">→</span></button>
+    <button type="button" class="visor-anterior" aria-label={t.anterior}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4 7 12l8 8" /></svg>
+    </button>
+    <button type="button" class="visor-siguiente" aria-label={t.siguiente}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4l8 8-8 8" /></svg>
+    </button>
   </div>
 </dialog>
 
@@ -32,6 +36,50 @@ const t = textos[Astro.props.idioma];
     const escenario = visor.querySelector<HTMLElement>('.visor-escenario')!;
     let actual = 0;
 
+    // Las flechas se pintan claras u oscuras según lo que tengan detrás.
+    // Se mide el brillo de esa zona concreta de la foto (o del fondo de la
+    // página, si la foto no llega hasta allí).
+    const flechas = [
+      visor.querySelector<HTMLElement>('.visor-anterior')!,
+      visor.querySelector<HTMLElement>('.visor-siguiente')!,
+    ];
+    const lienzo = document.createElement('canvas');
+    const pincel = lienzo.getContext('2d', { willReadFrequently: true });
+
+    const ajustarFlechas = () => {
+      // Solo se puede medir con el visor abierto y la foto ya colocada en pantalla
+      if (!pincel || !imagen.naturalWidth || !visor.open) return;
+      const marco = imagen.getBoundingClientRect();
+      if (!marco.width || !marco.height) return;
+      const LADO = 40;
+      lienzo.width = LADO;
+      lienzo.height = LADO;
+      pincel.drawImage(imagen, 0, 0, LADO, LADO);
+
+      for (const flecha of flechas) {
+        const dibujo = flecha.querySelector('svg')!.getBoundingClientRect();
+        const x = dibujo.left + dibujo.width / 2;
+        const y = dibujo.top + dibujo.height / 2;
+        let claro = true; // fuera de la foto está el fondo de la web, que es claro
+
+        if (x >= marco.left && x <= marco.right && y >= marco.top && y <= marco.bottom) {
+          const px = Math.min(LADO - 4, Math.max(0, Math.round(((x - marco.left) / marco.width) * LADO) - 2));
+          const py = Math.min(LADO - 4, Math.max(0, Math.round(((y - marco.top) / marco.height) * LADO) - 2));
+          try {
+            const datos = pincel.getImageData(px, py, 4, 4).data;
+            let suma = 0;
+            for (let i = 0; i < datos.length; i += 4) {
+              suma += 0.2126 * datos[i] + 0.7152 * datos[i + 1] + 0.0722 * datos[i + 2];
+            }
+            claro = suma / (datos.length / 4) > 140;
+          } catch {
+            claro = false; // si no se puede medir, se quedan blancas
+          }
+        }
+        flecha.classList.toggle('sobre-claro', claro);
+      }
+    };
+
     const mostrar = (indice: number) => {
       actual = (indice + botones.length) % botones.length;
       const origen = botones[actual].querySelector('img');
@@ -41,7 +89,11 @@ const t = textos[Astro.props.idioma];
       imagen.src = origen.src;
       imagen.alt = origen.alt;
       contador.textContent = `${actual + 1} / ${botones.length}`;
+      requestAnimationFrame(ajustarFlechas);
     };
+
+    imagen.addEventListener('load', ajustarFlechas);
+    window.addEventListener('resize', ajustarFlechas);
 
     botones.forEach((boton, indice) =>
       boton.addEventListener('click', () => {
@@ -62,14 +114,23 @@ const t = textos[Astro.props.idioma];
 
     // Deslizar con el dedo
     let inicioX: number | null = null;
+    let huboDeslizamiento = false;
     escenario.addEventListener('pointerdown', (evento) => {
       inicioX = evento.clientX;
+      huboDeslizamiento = false;
     });
     escenario.addEventListener('pointerup', (evento) => {
       if (inicioX === null) return;
       const distancia = evento.clientX - inicioX;
       inicioX = null;
+      huboDeslizamiento = Math.abs(distancia) > 10;
       if (Math.abs(distancia) > 50) mostrar(distancia < 0 ? actual + 1 : actual - 1);
+    });
+
+    // Tocar fuera de la foto también cierra (la foto, las flechas y los botones no)
+    visor.addEventListener('click', (evento) => {
+      if (huboDeslizamiento) return;
+      if (evento.target === visor || evento.target === escenario) visor.close();
     });
   }
 </script>

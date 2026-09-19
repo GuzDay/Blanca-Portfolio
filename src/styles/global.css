@@ -5,6 +5,10 @@
 
 :root {
   --fondo: #f7f5f2;
+  /* El mismo tono que --fondo, con transparencia, para el cristal esmerilado
+     de la cabecera y del menú. Si cambias --fondo, cambia también este. */
+  --cristal: rgba(247, 245, 242, 0.62);
+  --cristal-desenfoque: blur(10px) saturate(140%);
   --texto: #1a1a1a;
   --gris: #6b6b6b;
   --linea: #e4e0da;
@@ -130,6 +134,38 @@ figure {
   background: var(--fondo);
 }
 
+/* Cristal esmerilado: lo que pasa por debajo (las fotos de la portada) se ve
+   desenfocado en vez de quedar tapado. Solo si el navegador sabe hacerlo.
+   El cristal va en una capa aparte (::before) y no en la propia cabecera:
+   si lo lleva la cabecera, el menú desplegable que cuelga de ella se queda
+   sin desenfoque, porque un cristal dentro de otro no ve el fondo de la página. */
+/* Sin soporte de cristal, esta capa no se usa */
+.cabecera-cristal {
+  display: none;
+}
+
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .cabecera {
+    background: transparent;
+  }
+
+  .cabecera-cristal {
+    display: block;
+    position: absolute;
+    inset: 0;
+    background: var(--cristal);
+    -webkit-backdrop-filter: var(--cristal-desenfoque);
+    backdrop-filter: var(--cristal-desenfoque);
+  }
+
+  /* El contenido, por encima del cristal (sin profundidades negativas:
+     hay navegadores que ahí no desenfocan) */
+  .cabecera > :not(.cabecera-cristal) {
+    position: relative;
+    z-index: 1;
+  }
+}
+
 .marca {
   font-size: 0.8125rem;
   font-weight: 400;
@@ -173,19 +209,209 @@ figure {
   gap: 0.6rem;
 }
 
-/* Móvil: nombre e idioma arriba, categorías debajo (siempre visibles) */
+/* Con el menú abierto a pantalla completa, la página de detrás no se desplaza */
+html:has(.menu-abierto) {
+  overflow: hidden;
+}
+
+/* Botón de menú: solo aparece en móvil */
+.menu-boton {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin: -0.9rem calc(var(--margen) * -0.4) -0.9rem 0;
+  color: var(--texto);
+}
+
+.menu-icono,
+.menu-icono::before,
+.menu-icono::after {
+  width: 20px;
+  height: 1px;
+  background: currentColor;
+}
+
+.menu-icono {
+  position: relative;
+  transition: background-color 0.2s ease;
+}
+
+.menu-icono::before,
+.menu-icono::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  transition: transform 0.25s ease;
+}
+
+.menu-icono::before {
+  top: -6px;
+}
+
+.menu-icono::after {
+  top: 6px;
+}
+
+/* Abierto: las tres rayas se convierten en una equis */
+.menu-abierto .menu-icono {
+  background-color: transparent;
+}
+
+.menu-abierto .menu-icono::before {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.menu-abierto .menu-icono::after {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+/* Móvil: nombre e idiomas arriba, categorías dentro del menú hamburguesa */
 @media (max-width: 900px) {
   .cabecera {
-    grid-template-columns: 1fr auto;
-    padding-block: 0.9rem 0.7rem;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 0.5rem 0.6rem; /* idiomas y hamburguesa juntos, a la derecha */
+    padding-block: 0.9rem;
   }
-  .menu {
-    grid-column: 1 / -1;
-    grid-row: 2;
+
+  .menu-boton {
+    display: flex;
+    order: 2; /* la hamburguesa, a la derecha del todo */
   }
+
+  /* Los idiomas, a su izquierda y más discretos: más juntos, más pequeños
+     y con el idioma que no está activo apagado */
+  .idiomas {
+    order: 1;
+    gap: 0.3rem;
+    margin-right: 0.35rem;
+    font-size: 0.6875rem;
+  }
+
+  .idiomas a {
+    padding: 0.4rem 0.15rem; /* zona de toque, sin agrandar el texto */
+    font-size: inherit;
+    letter-spacing: 0.04em;
+  }
+
+  .idiomas a:not([aria-current]) {
+    opacity: 0.45;
+  }
+
+  /* A pantalla completa, con las secciones centradas en el medio */
+  .cabecera .menu {
+    position: fixed;
+    inset: 0;
+    z-index: 0; /* por debajo del nombre y del botón de cerrar */
+    display: none;
+    padding: var(--margen);
+    background: var(--fondo);
+  }
+
+  .menu-abierto .menu,
+  .menu-cerrando .menu {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cabecera .menu ul {
+    align-items: center;
+  }
+
+  @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .cabecera .menu {
+      /* Exactamente el mismo cristal que la cabecera */
+      background: var(--cristal);
+      -webkit-backdrop-filter: var(--cristal-desenfoque);
+      backdrop-filter: var(--cristal-desenfoque);
+    }
+  }
+
+  /* Al desplegarse: el panel baja un poco y las secciones entran una tras otra */
+  .menu-abierto .menu {
+    animation: menu-desplegar 0.26s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  }
+
+  .menu-abierto .menu li {
+    animation: menu-seccion 0.24s ease both;
+    animation-delay: calc(0.06s + var(--i, 0) * 0.022s);
+  }
+
+  /* Al cerrar, lo mismo del revés: primero se van las secciones, de abajo
+     arriba, y después sube el panel */
+  .menu-cerrando .menu {
+    animation: menu-plegar 0.26s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+    animation-delay: 0.1s;
+  }
+
+  .menu-cerrando .menu li {
+    animation: menu-seccion-salir 0.24s ease both;
+    animation-delay: calc(var(--j, 0) * 0.022s);
+  }
+
+  @keyframes menu-plegar {
+    from {
+      opacity: 1;
+      transform: none;
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes menu-seccion-salir {
+    from {
+      opacity: 1;
+      transform: none;
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+  }
+
+  @keyframes menu-desplegar {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes menu-seccion {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
   .menu ul {
+    flex-direction: column;
     justify-content: flex-start;
-    gap: 0.15rem 1rem;
+    gap: 0;
+  }
+
+  .menu li {
+    width: auto;
+  }
+
+  .menu a {
+    display: block;
+    padding: 0.85rem 0;
+    font-size: 1rem;
+    color: var(--texto);
+    text-align: center;
   }
 }
 
@@ -576,9 +802,38 @@ html:has(.visor[open]) {
   display: flex;
   align-items: center;
   width: 30%;
-  padding-inline: var(--margen);
-  font-size: 1.25rem;
-  color: var(--gris);
+  padding-inline: calc(var(--margen) + 0.75rem); /* separadas del borde */
+  /* Blancas con una sombra suave: se ven sobre cualquier foto, clara, oscura
+     o recargada, sin necesidad de ponerles fondo.
+     (Se probó el modo "difference", que invierte el color de la foto, pero
+     tiene un punto ciego: frente a un gris medio la flecha desaparece.) */
+  color: #fff;
+  opacity: 0.75;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.45));
+  transition:
+    opacity 0.2s,
+    color 0.25s,
+    filter 0.25s;
+}
+
+/* Sobre una zona clara, la flecha se vuelve oscura (lo decide el visor midiendo
+   el brillo de la foto justo detrás de ella) */
+.visor-anterior.sobre-claro,
+.visor-siguiente.sobre-claro {
+  color: #1a1a1a;
+  opacity: 0.55;
+  filter: drop-shadow(0 1px 3px rgba(255, 255, 255, 0.5));
+}
+
+.visor-anterior svg,
+.visor-siguiente svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .visor-anterior {
@@ -595,12 +850,46 @@ html:has(.visor[open]) {
 
 .visor-anterior:hover,
 .visor-siguiente:hover {
-  color: var(--texto);
+  opacity: 1;
 }
 
 .visor.una-foto .visor-anterior,
 .visor.una-foto .visor-siguiente {
   display: none;
+}
+
+/* Móvil: el contador arriba centrado y el botón de cerrar abajo, al alcance
+   del pulgar. En ordenador se queda como está, los dos arriba. */
+@media (max-width: 900px) {
+  .visor[open] {
+    grid-template-rows: auto 1fr auto;
+  }
+
+  .visor-barra {
+    display: contents;
+  }
+
+  .visor-contador {
+    grid-row: 1;
+    /* Separado del borde de arriba, no pegado a él */
+    padding: 2.6rem var(--margen) 0.5rem;
+    text-align: center;
+  }
+
+  .visor-cerrar {
+    grid-row: 3;
+    justify-self: center;
+    /* Y este, separado del borde de abajo */
+    padding: 0.9rem 2rem calc(2.6rem + env(safe-area-inset-bottom));
+  }
+
+  .visor-escenario {
+    padding-bottom: 0;
+  }
+
+  .visor-imagen {
+    max-height: calc(100dvh - 12rem);
+  }
 }
 
 /* ---------- Info ---------- */
@@ -703,6 +992,21 @@ html:has(.visor[open]) {
 
 /* ---------- Home: "Espiral" ---------- */
 
+/* Cuánto tardan en entrar las fotos y la cabecera. Al llegar de fuera se espera
+   a que pase la presentación con el nombre; viniendo de otra página, casi nada. */
+:root {
+  --espera-portada: 0.15s;
+}
+
+html.con-presentacion {
+  --espera-portada: 1.46s;
+}
+
+/* El nombre solo existe cuando hay presentación */
+html:not(.con-presentacion) .espiral-nombre {
+  display: none;
+}
+
 .inicio-espiral {
   /* Cambia este color a #0d0d0d para probar la portada sobre fondo oscuro */
   --fondo-espiral: var(--fondo);
@@ -711,10 +1015,11 @@ html:has(.visor[open]) {
   --radio: 1.55vmin; /* cuánto se separan del centro */
 
   position: relative;
-  /* A pantalla completa: se sale del margen y del aire que deja la página */
+  /* A pantalla completa, también por detrás de la cabecera: así las fotos
+     pasan bajo el menú y se ven a través del cristal esmerilado */
   margin-inline: calc(var(--margen) * -1);
-  margin-block: -1.5rem -5rem;
-  height: calc(100svh - var(--alto-cabecera, 4rem));
+  margin-block: calc((var(--alto-cabecera, 4rem) + 1.5rem) * -1) -5rem;
+  height: 100svh;
   min-height: 320px;
   overflow: hidden;
   background: var(--fondo-espiral);
@@ -722,9 +1027,23 @@ html:has(.visor[open]) {
 
 /* En esta portada la cabecera (nombre, categorías e idiomas) no está desde el
    principio: entra suavemente a la vez que las fotos. Solo afecta a esta página. */
-body:has(.inicio-espiral) .cabecera {
+/* La animación va sobre las piezas de la barra, no sobre la cabecera entera:
+   si se anima la cabecera, el cristal esmerilado de dentro deja de desenfocar.
+   El panel del menú queda fuera a propósito: tiene sus propias animaciones. */
+body:has(.inicio-espiral) .cabecera-cristal,
+body:has(.inicio-espiral) .marca,
+body:has(.inicio-espiral) .menu-boton,
+body:has(.inicio-espiral) .idiomas {
   animation: espiral-entrar 1.4s ease both;
-  animation-delay: 2.1s;
+  animation-delay: calc(var(--espera-portada) + 0.5s); /* medio segundo después de las fotos */
+}
+
+/* En ordenador el menú está en la barra, así que entra con ella */
+@media (min-width: 901px) {
+  body:has(.inicio-espiral) .menu {
+    animation: espiral-entrar 1.4s ease both;
+    animation-delay: calc(var(--espera-portada) + 0.5s);
+  }
 }
 
 @keyframes espiral-entrar {
@@ -741,7 +1060,7 @@ body:has(.inicio-espiral) .cabecera {
   position: absolute;
   left: 50%;
   top: 50%;
-  z-index: 3;
+  z-index: 1; /* por detrás de las fotos */
   margin: 0;
   padding-left: 0.3em; /* compensa el espacio que deja la última letra */
   font-size: clamp(0.8rem, 3.2vw, 1.75rem);
@@ -750,8 +1069,8 @@ body:has(.inicio-espiral) .cabecera {
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
-  animation: espiral-presentar 2.4s ease both;
-  animation-delay: 0.5s;
+  animation: espiral-presentar 2s ease both;
+  animation-delay: 0.3s;
 }
 
 @keyframes espiral-presentar {
@@ -760,12 +1079,12 @@ body:has(.inicio-espiral) .cabecera {
     letter-spacing: 0.75em;
     transform: translate(-50%, -50%);
   }
-  35% {
+  45% {
     opacity: 1;
     letter-spacing: 0.3em;
     transform: translate(-50%, -50%);
   }
-  65% {
+  58% {
     opacity: 1;
     letter-spacing: 0.3em;
     transform: translate(-50%, -50%);
@@ -780,6 +1099,7 @@ body:has(.inicio-espiral) .cabecera {
 .espiral-giro {
   position: absolute;
   inset: 0;
+  z-index: 2; /* las fotos tapan el nombre al entrar */
   animation: espiral-girar var(--vuelta) linear infinite;
 }
 
@@ -800,8 +1120,8 @@ body:has(.inicio-espiral) .cabecera {
 
 .espiral-pieza a {
   display: block;
-  animation: espiral-aparecer 1.1s cubic-bezier(0.22, 0.61, 0.36, 1) both;
-  animation-delay: var(--retraso);
+  animation: espiral-aparecer 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation-delay: calc(var(--espera-portada) + var(--escalon));
 }
 
 .espiral-pieza img {
@@ -856,6 +1176,10 @@ body:has(.inicio-espiral) .cabecera {
   from {
     opacity: 0;
     transform: scale(0.35);
+  }
+  70% {
+    /* deja de ser transparente antes de terminar de crecer */
+    opacity: 1;
   }
   to {
     opacity: 1;
