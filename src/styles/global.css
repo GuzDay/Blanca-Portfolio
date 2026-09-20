@@ -28,6 +28,8 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* Quita el recuadro gris que los móviles pintan encima de lo que tocas */
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
