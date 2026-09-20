@@ -442,6 +442,16 @@ html:has(.menu-abierto) {
   color: var(--texto);
 }
 
+/* En el móvil, la barra flotante del navegador (la de las flechas y el compartir)
+   se dibuja ENCIMA de lo último de la página, y tapaba el pie. Se le deja hueco
+   de sobra por debajo. env() suma además la franja del indicador de inicio en los
+   iPhone sin botón. */
+@media (max-width: 700px) {
+  .pie {
+    padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 /* ---------- Pie de foto (Home) ---------- */
 
 .pie-foto {
