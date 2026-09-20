@@ -1257,4 +1257,11 @@ body:has(.inicio-espiral) .idiomas {
   .espiral-giro {
     transform: translateY(calc(var(--alto-cabecera, 4rem) / 2));
   }
+
+  /* El pie no debe asomar al entrar en la portada. En el móvil el navegador deja
+     ver algo más de alto del que promete 100svh, así que en vez de subir el pie
+     (margen negativo, como en ordenador) se le aparta por debajo del corte. */
+  .inicio-espiral {
+    margin-bottom: 2.5rem;
+  }
 }
