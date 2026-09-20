@@ -31,6 +31,9 @@ const colocadas = fotos.map((foto, i) => {
     foto,
     // Para el orden de aparición: 0 = arriba, y de ahí en el sentido del reloj
     vuelta: (grados + 90) % 360,
+    grados: grados.toFixed(2), // de dónde parte; el giro lo lleva JavaScript
+    distancia: radio.toFixed(2), // cuántas unidades se aleja del centro
+    // Posición de salida, por si no hay JavaScript o el sistema pide menos movimiento
     x: (Math.cos(angulo) * radio).toFixed(2),
     y: (Math.sin(angulo) * radio).toFixed(2),
     ancho: foto.vertical ? 15 : 21, // las verticales, más estrechas
@@ -59,10 +62,10 @@ const piezas = colocadas.map((pieza) => ({
   <p class="espiral-nombre" aria-hidden="true">{ajustes.nombre}</p>
   <div class="espiral-giro">
     {
-      piezas.map(({ foto, x, y, ancho, escalon }, i) => (
+      piezas.map(({ foto, x, y, grados, distancia, ancho, escalon }, i) => (
         <figure
           class="espiral-pieza"
-          style={`--x:${x}; --y:${y}; --ancho:${ancho}; --escalon:${escalon}ms`}
+          style={`--x:${x}; --y:${y}; --grados:${grados}; --distancia:${distancia}; --ancho:${ancho}; --escalon:${escalon}ms`}
         >
           <div class="espiral-contragiro">
             <a href={urlCategoria(foto.proyecto.categoria, idioma)}>
@@ -93,6 +96,56 @@ const piezas = colocadas.map((pieza) => ({
   };
   medirCabecera();
   window.addEventListener('resize', medirCabecera);
+
+  // El giro lo lleva JavaScript, no CSS. Con una animación de CSS girando todo el
+  // grupo, la elipse giraría con él y a los treinta segundos sería alta en vez de
+  // ancha. Moviendo cada foto por separado, la elipse se queda quieta y además las
+  // fotos ya no necesitan girar al revés para verse rectas.
+  const grupo = document.querySelector<HTMLElement>('.inicio-espiral');
+  if (grupo) {
+    const piezas = [...grupo.querySelectorAll<HTMLElement>('.espiral-pieza')].map((pieza) => ({
+      pieza,
+      grados: parseFloat(pieza.style.getPropertyValue('--grados')) || 0,
+      distancia: parseFloat(pieza.style.getPropertyValue('--distancia')) || 0,
+    }));
+
+    // Lo que tarda en dar una vuelta entera está en el CSS (--vuelta), porque
+    // cambia en móvil.
+    const leerVuelta = () => {
+      const bruto = getComputedStyle(grupo).getPropertyValue('--vuelta').trim();
+      const valor = parseFloat(bruto) || 120;
+      return bruto.endsWith('ms') ? valor : valor * 1000;
+    };
+
+    let vuelta = leerVuelta();
+    window.addEventListener('resize', () => {
+      vuelta = leerVuelta();
+    });
+
+    const menosMovimiento = matchMedia('(prefers-reduced-motion: reduce)');
+    let arranque = 0;
+    let giro = 0;
+
+    const mover = (ahora: number) => {
+      if (!arranque) arranque = ahora;
+      const avance = ((ahora - arranque) / vuelta) * 360;
+      for (const { pieza, grados, distancia } of piezas) {
+        const angulo = ((grados + avance) * Math.PI) / 180;
+        pieza.style.setProperty('--x', (Math.cos(angulo) * distancia).toFixed(3));
+        pieza.style.setProperty('--y', (Math.sin(angulo) * distancia).toFixed(3));
+      }
+      giro = requestAnimationFrame(mover);
+    };
+
+    const ajustarMovimiento = () => {
+      cancelAnimationFrame(giro);
+      arranque = 0;
+      if (!menosMovimiento.matches) giro = requestAnimationFrame(mover);
+    };
+
+    ajustarMovimiento();
+    menosMovimiento.addEventListener('change', ajustarMovimiento);
+  }
 
   // El rótulo con el nombre de la categoría sigue a la foto señalada.
   // Va suelto, fuera del grupo que gira, porque "mix-blend-mode" solo se mezcla

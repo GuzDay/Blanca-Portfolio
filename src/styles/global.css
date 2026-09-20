@@ -1016,8 +1016,11 @@ html:not(.con-presentacion) .espiral-nombre {
   /* Cambia este color a #0d0d0d para probar la portada sobre fondo oscuro */
   --fondo-espiral: var(--fondo);
   --vuelta: 120s; /* lo que tarda en dar una vuelta entera */
-  --foto: 1.25vmin; /* tamaño de las fotos */
+  --foto: 1.5vmin; /* tamaño de las fotos */
   --radio: 1.55vmin; /* cuánto se separan del centro */
+  /* Separados, el círculo se convierte en elipse (ver más abajo, en ordenador) */
+  --radio-x: var(--radio);
+  --radio-y: var(--radio);
 
   position: relative;
   /* A pantalla completa, también por detrás de la cabecera: así las fotos
@@ -1105,7 +1108,6 @@ body:has(.inicio-espiral) .idiomas {
   position: absolute;
   inset: 0;
   z-index: 2; /* las fotos tapan el nombre al entrar */
-  animation: espiral-girar var(--vuelta) linear infinite;
 }
 
 .espiral-pieza {
@@ -1114,13 +1116,15 @@ body:has(.inicio-espiral) .idiomas {
   top: 50%;
   width: calc(var(--ancho) * var(--foto));
   margin: 0;
-  transform: translate(-50%, -50%) translate(calc(var(--x) * var(--radio)), calc(var(--y) * var(--radio)))
-    scale(var(--zoom, 1));
+  transform: translate(-50%, -50%)
+    translate(calc(var(--x) * var(--radio-x)), calc(var(--y) * var(--radio-y)));
 }
 
-/* El grupo gira en un sentido y cada foto en el contrario: así no se inclinan */
+/* El acercamiento al señalar una foto va aquí, no en la pieza: la pieza la
+   recoloca JavaScript en cada fotograma y se comería la transición */
 .espiral-contragiro {
-  animation: espiral-contragirar var(--vuelta) linear infinite;
+  transform: scale(var(--zoom, 1));
+  transition: transform 0.45s ease;
 }
 
 .espiral-pieza a {
@@ -1136,9 +1140,7 @@ body:has(.inicio-espiral) .idiomas {
 }
 
 .espiral-pieza {
-  transition:
-    opacity 0.45s ease,
-    transform 0.45s ease;
+  transition: opacity 0.45s ease;
 }
 
 /* La foto señalada pasa por delante de todas y se acerca un poco */
@@ -1182,18 +1184,6 @@ body:has(.inicio-espiral) .idiomas {
   opacity: 1;
 }
 
-@keyframes espiral-girar {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes espiral-contragirar {
-  to {
-    transform: rotate(-360deg);
-  }
-}
-
 /* Aparecen desde el centro: pequeñas y transparentes */
 @keyframes espiral-aparecer {
   from {
@@ -1221,6 +1211,18 @@ body:has(.inicio-espiral) .idiomas {
   }
 }
 
+/* En ordenador las fotos describen una elipse ancha, no un círculo: así llenan
+   el hueco blanco de los lados sin salirse por arriba y por abajo */
+@media (min-width: 701px) {
+  .inicio-espiral {
+    /* A lo ancho se mide contra el ancho de la ventana (vw), no contra el lado
+       corto: así en un monitor grande la elipse se abre en vez de dejar blanco */
+    --radio-x: 1.42vw;
+    --radio-y: 1.45vmin;
+  }
+}
+
+/* En móvil se queda el círculo de siempre: ahí sobra alto, no ancho */
 @media (max-width: 700px) {
   .inicio-espiral {
     --vuelta: 150s;
