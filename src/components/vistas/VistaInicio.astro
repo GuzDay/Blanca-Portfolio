@@ -3,7 +3,7 @@ import Base from '../../layouts/Base.astro';
 import InicioEspiral from '../inicio/InicioEspiral.astro';
 import type { Idioma } from '../../i18n/categorias';
 import { textos } from '../../i18n/textos';
-import { ajustes, fotosInicio } from '../../lib/contenido';
+import { ajustes, fotosInicio, retrato } from '../../lib/contenido';
 import { urlInicio } from '../../lib/rutas';
 
 interface Props {
@@ -23,7 +23,9 @@ const t = textos[idioma];
 <Base
   idioma={idioma}
   alternativas={alternativas}
-  imagenSocial={fotosInicio[0]?.imagen}
+  {/* Al compartir el enlace (WhatsApp, redes...) sale el retrato de Blanca,
+      no una foto cualquiera de la portada */}
+  imagenSocial={retrato ?? fotosInicio[0]?.imagen}
   datosEstructurados
   noIndex={noIndex}
 >
