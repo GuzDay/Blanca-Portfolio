@@ -1250,4 +1250,11 @@ body:has(.inicio-espiral) .idiomas {
     --foto: 2.2vmin;
     --radio: 2.1vmin;
   }
+
+  /* Las fotos están centradas en la pantalla entera, pero la cabecera ocupa la
+     franja de arriba, así que el hueco libre tiene su centro más abajo. Se bajan
+     media cabecera para que queden centradas a la vista. */
+  .espiral-giro {
+    transform: translateY(calc(var(--alto-cabecera, 4rem) / 2));
+  }
 }
