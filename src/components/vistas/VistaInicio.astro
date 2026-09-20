@@ -1,35 +1,23 @@
 ---
 import Base from '../../layouts/Base.astro';
-import InicioFlujo from '../inicio/InicioFlujo.astro';
 import InicioEspiral from '../inicio/InicioEspiral.astro';
-import InicioMosaico from '../inicio/InicioMosaico.astro';
-import InicioPase from '../inicio/InicioPase.astro';
 import type { Idioma } from '../../i18n/categorias';
 import { textos } from '../../i18n/textos';
 import { ajustes, fotosInicio } from '../../lib/contenido';
 import { urlInicio } from '../../lib/rutas';
 
-export type VarianteInicio = 'una-tras-otra' | 'mosaico' | 'pase' | 'espiral';
-
-// ⬇️ Variante que se usa en la Home de verdad (cuando elijáis, se borran las otras)
-const VARIANTE_ELEGIDA: VarianteInicio = 'espiral';
-
 interface Props {
   idioma: Idioma;
-  variante?: VarianteInicio;
   alternativas?: Record<Idioma, string>;
   noIndex?: boolean;
 }
 
 const {
   idioma,
-  variante = VARIANTE_ELEGIDA,
   alternativas = { es: urlInicio('es'), en: urlInicio('en') },
   noIndex = false,
 } = Astro.props;
 const t = textos[idioma];
-const componentes = { 'una-tras-otra': InicioFlujo, mosaico: InicioMosaico, pase: InicioPase, espiral: InicioEspiral };
-const Componente = componentes[variante];
 ---
 
 <Base
@@ -40,5 +28,5 @@ const Componente = componentes[variante];
   noIndex={noIndex}
 >
   <h1 class="visualmente-oculto">{ajustes.nombre} — {t.profesion}</h1>
-  <Componente fotos={fotosInicio} idioma={idioma} />
+  <InicioEspiral fotos={fotosInicio} idioma={idioma} />
 </Base>
