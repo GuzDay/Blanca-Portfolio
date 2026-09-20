@@ -209,6 +209,7 @@ figure {
   gap: 0.6rem;
 }
 
+
 /* Con el menú abierto a pantalla completa, la página de detrás no se desplaza */
 html:has(.menu-abierto) {
   overflow: hidden;
@@ -306,7 +307,8 @@ html:has(.menu-abierto) {
     inset: 0;
     z-index: 0; /* por debajo del nombre y del botón de cerrar */
     display: none;
-    padding: var(--margen);
+    /* Sin margen a los lados: cada sección se pulsa de borde a borde */
+    padding: var(--margen) 0;
     background: var(--fondo);
   }
 
@@ -318,7 +320,8 @@ html:has(.menu-abierto) {
   }
 
   .cabecera .menu ul {
-    align-items: center;
+    width: 100%;
+    align-items: stretch;
   }
 
   @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -403,12 +406,14 @@ html:has(.menu-abierto) {
   }
 
   .menu li {
-    width: auto;
+    width: 100%;
   }
 
+  /* Toda la fila es pulsable, no solo las letras */
   .menu a {
     display: block;
-    padding: 0.85rem 0;
+    width: 100%;
+    padding: 0.95rem var(--margen);
     font-size: 1rem;
     color: var(--texto);
     text-align: center;
@@ -1149,13 +1154,31 @@ body:has(.inicio-espiral) .idiomas {
   opacity: 0.55;
 }
 
-.espiral-pieza .pie-foto {
+/* El nombre de la categoría de la foto señalada. Va suelto, fuera del grupo que
+   gira, y se coloca desde JavaScript debajo de la foto. "difference" invierte el
+   color de lo que tiene detrás, así que se lee tanto sobre el fondo claro como
+   sobre una foto oscura. */
+.espiral-rotulo {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 3; /* por encima de las fotos, que están en z-index 2 */
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  /* El color lo decide JavaScript midiendo el brillo de lo que queda detrás:
+     blanco sobre lo oscuro, casi negro sobre lo claro. La mezcla "difference"
+     no sirve aquí porque se anula justo sobre los grises medios. */
+  color: #111;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    color 0.2s ease;
+  pointer-events: none;
 }
 
-.espiral-pieza a:hover .pie-foto,
-.espiral-pieza a:focus-visible .pie-foto {
+.espiral-rotulo.se-ve {
   opacity: 1;
 }
 

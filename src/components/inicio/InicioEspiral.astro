@@ -72,13 +72,14 @@ const piezas = colocadas.map((pieza) => ({
                 sizes="(max-width: 700px) 70vw, 32vw"
                 prioridad={i < 4}
               />
-              <figcaption class="pie-foto">{foto.proyecto.categoria.nombre[idioma]}</figcaption>
+              <figcaption class="visualmente-oculto">{foto.proyecto.categoria.nombre[idioma]}</figcaption>
             </a>
           </div>
         </figure>
       ))
     }
   </div>
+  <p class="espiral-rotulo" aria-hidden="true"></p>
 </div>
 
 <script>
@@ -92,4 +93,107 @@ const piezas = colocadas.map((pieza) => ({
   };
   medirCabecera();
   window.addEventListener('resize', medirCabecera);
+
+  // El rótulo con el nombre de la categoría sigue a la foto señalada.
+  // Va suelto, fuera del grupo que gira, porque "mix-blend-mode" solo se mezcla
+  // con lo que hay detrás si no está encerrado en algo con transform o animación.
+  const espiral = document.querySelector<HTMLElement>('.inicio-espiral');
+  const rotulo = espiral?.querySelector<HTMLElement>('.espiral-rotulo');
+
+  if (espiral && rotulo) {
+    let señalada: HTMLElement | null = null;
+    let cuadro = 0;
+
+    // Para medir el brillo de lo que queda detrás del rótulo.
+    const lienzo = document.createElement('canvas');
+    lienzo.width = 8;
+    lienzo.height = 8;
+    const pincel = lienzo.getContext('2d', { willReadFrequently: true });
+
+    const FONDO = 0.9; // brillo del color de fondo de la web (crema)
+    const NEGRO = 0.007; // brillo del #111
+    const contraste = (a: number, b: number) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+
+    // Brillo medio de la foto en el punto (x, y) de la pantalla, ya mezclado con el
+    // fondo según lo apagada que esté esa foto.
+    const brilloEn = (x: number, y: number) => {
+      const debajo = document.elementsFromPoint(x, y);
+      const imagen = debajo.find(
+        (el): el is HTMLImageElement => el instanceof HTMLImageElement && !!el.closest('.espiral-pieza'),
+      );
+      if (!imagen || !pincel || !imagen.naturalWidth) return FONDO;
+      const caja = imagen.getBoundingClientRect();
+      if (!caja.width || !caja.height) return FONDO;
+      const sx = ((x - caja.left) / caja.width) * imagen.naturalWidth;
+      const sy = ((y - caja.top) / caja.height) * imagen.naturalHeight;
+      const lado = Math.max(8, imagen.naturalWidth / 40);
+      try {
+        pincel.drawImage(imagen, Math.max(0, sx - lado / 2), Math.max(0, sy - lado / 2), lado, lado, 0, 0, 8, 8);
+        const { data } = pincel.getImageData(0, 0, 8, 8);
+        let suma = 0;
+        for (let i = 0; i < data.length; i += 4) {
+          suma += (0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2]) / 255;
+        }
+        const brilloFoto = suma / (data.length / 4);
+        // Las fotos no señaladas están a media opacidad sobre el fondo crema
+        const pieza = imagen.closest<HTMLElement>('.espiral-pieza');
+        const opacidad = pieza ? parseFloat(getComputedStyle(pieza).opacity) || 1 : 1;
+        return opacidad * brilloFoto + (1 - opacidad) * FONDO;
+      } catch {
+        return FONDO;
+      }
+    };
+
+    // Elige blanco o casi negro: el que mejor se lea en el trozo peor del rótulo.
+    let ultimoAjuste = 0;
+    const ajustarColor = () => {
+      const caja = rotulo.getBoundingClientRect();
+      if (!caja.width) return;
+      const y = caja.top + caja.height / 2;
+      const puntos = [caja.left + 2, caja.left + caja.width / 2, caja.right - 2].map((x) => brilloEn(x, y));
+      const peorNegro = Math.min(...puntos.map((b) => contraste(b, NEGRO)));
+      const peorBlanco = Math.min(...puntos.map((b) => contraste(b, 1)));
+      rotulo.style.color = peorNegro >= peorBlanco ? '#111' : '#fff';
+    };
+
+    // La espiral gira, así que hay que recolocar el rótulo en cada fotograma.
+    const seguir = () => {
+      if (!señalada) return;
+      const imagen = señalada.querySelector('img');
+      const caja = (imagen ?? señalada).getBoundingClientRect();
+      const base = espiral.getBoundingClientRect();
+      rotulo.style.left = `${caja.left - base.left}px`;
+      rotulo.style.top = `${caja.bottom - base.top + 8}px`;
+      // Medir cuesta, así que se hace unas ocho veces por segundo, no en cada fotograma.
+      const ahora = performance.now();
+      if (ahora - ultimoAjuste > 120) {
+        ultimoAjuste = ahora;
+        ajustarColor();
+      }
+      cuadro = requestAnimationFrame(seguir);
+    };
+
+    const mostrar = (pieza: HTMLElement) => {
+      const nombre = pieza.querySelector('figcaption')?.textContent?.trim();
+      if (!nombre) return;
+      rotulo.textContent = nombre;
+      señalada = pieza;
+      rotulo.classList.add('se-ve');
+      cancelAnimationFrame(cuadro);
+      seguir();
+    };
+
+    const esconder = () => {
+      señalada = null;
+      cancelAnimationFrame(cuadro);
+      rotulo.classList.remove('se-ve');
+    };
+
+    for (const pieza of espiral.querySelectorAll<HTMLElement>('.espiral-pieza')) {
+      pieza.addEventListener('mouseenter', () => mostrar(pieza));
+      pieza.addEventListener('mouseleave', esconder);
+      pieza.addEventListener('focusin', () => mostrar(pieza));
+      pieza.addEventListener('focusout', esconder);
+    }
+  }
 </script>

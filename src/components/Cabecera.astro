@@ -95,6 +95,12 @@ const t = textos[idioma];
 
     boton.addEventListener('click', () => mostrar(!cabecera.classList.contains('menu-abierto')));
 
+    // Tocar el hueco vacío del panel (por debajo de la última sección, o por
+    // encima de la primera) cierra el menú. Solo los enlaces se libran.
+    panel?.addEventListener('click', (evento) => {
+      if (!(evento.target as HTMLElement).closest('a')) mostrar(false);
+    });
+
     // Se cierra al tocar fuera, con Escape, y si la ventana se hace grande
     document.addEventListener('click', (evento) => {
       if (!cabecera.contains(evento.target as Node)) mostrar(false);

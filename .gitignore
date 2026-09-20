@@ -11,7 +11,3 @@ Thumbs.db
 *.log
 .env
 .env.*
-
-# Fotos de los proyectos (pesan mucho y de momento no van a GitHub).
-# Viven solo en tu ordenador: contenido/proyectos/
-contenido/proyectos/

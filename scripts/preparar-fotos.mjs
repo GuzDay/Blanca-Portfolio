@@ -59,6 +59,11 @@ const aSlug = (texto) =>
     .replace(/^-+|-+$/g, '');
 
 const ordenNatural = (a, b) => a.localeCompare(b, 'es', { numeric: true, sensitivity: 'base' });
+
+// "01 Fashion Week" → "Fashion Week". El número de delante solo sirve para decidir el orden
+// en la web; no se ve en ningún sitio. Se quitan uno o dos dígitos seguidos de espacio,
+// punto, guion o paréntesis: así un año ("2025 Verano") se respeta tal cual.
+const sinNumeroDeOrden = (texto) => texto.replace(/^(\d{1,2})(?:\s*[-._)]\s*|\s+)(?=\S)/, '');
 const carpetas = (ruta) => readdirSync(ruta).filter((n) => !n.startsWith('.') && statSync(join(ruta, n)).isDirectory());
 const archivos = (ruta) => readdirSync(ruta).filter((n) => !n.startsWith('.') && statSync(join(ruta, n)).isFile());
 const fotosDe = (ruta) => archivos(ruta).filter((n) => FOTOS.has(extname(n).toLowerCase())).sort(ordenNatural);
@@ -119,10 +124,11 @@ for (const nombreCarpeta of carpetas(raiz).sort(ordenNatural)) {
   }
 
   const rutaCategoria = join(raiz, nombreCarpeta);
-  const subcarpetas = carpetas(rutaCategoria);
-  // Con subcarpetas, cada una es un proyecto. Sin ellas, todas las fotos van a un único proyecto.
+  const subcarpetas = carpetas(rutaCategoria).sort(ordenNatural);
+  // Con subcarpetas, cada una es un proyecto y salen en el orden de sus nombres.
+  // Sin ellas, todas las fotos van a un único proyecto.
   const proyectos = subcarpetas.length
-    ? subcarpetas.map((n) => ({ titulo: n, ruta: join(rutaCategoria, n) }))
+    ? subcarpetas.map((n) => ({ titulo: sinNumeroDeOrden(n), ruta: join(rutaCategoria, n) }))
     : [{ titulo: 'Selección', ruta: rutaCategoria }];
 
   let orden = 1;
