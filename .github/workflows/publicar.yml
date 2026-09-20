@@ -23,15 +23,11 @@ jobs:
       - name: Descargar el proyecto
         uses: actions/checkout@v7
 
+      # La dirección de la web sale de astro.config.mjs: https://blancagtarrio.com
       - name: Revisar archivos, construir la web y prepararla
         uses: withastro/action@v6
         with:
           node-version: 24
-        env:
-          SITIO: https://guzday.github.io
-          RUTA_BASE: /Blanca-Portfolio
-          # Versión de prueba: pide a Google que no la indexe. Quitar al conectar blancagtarrio.com
-          PUBLIC_SIN_INDEXAR: 'true'
 
   publicar:
     needs: construir
