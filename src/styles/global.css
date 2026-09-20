@@ -1066,11 +1066,15 @@ body:has(.inicio-espiral) .idiomas {
 /* Entrada: primero aparece el nombre en el centro y luego se apaga */
 .espiral-nombre {
   position: absolute;
-  left: 50%;
+  /* De lado a lado y centrado con text-align, no moviendo la caja media anchura:
+     así da igual lo ancha que cada navegador calcule la caja. Safari en iPhone la
+     media distinta que Chrome y el nombre salía descentrado. */
+  left: 0;
+  right: 0;
   top: 50%;
   z-index: 1; /* por detrás de las fotos */
   margin: 0;
-  padding-left: 0.3em; /* compensa el espacio que deja la última letra */
+  text-align: center;
   font-size: clamp(0.8rem, 3.2vw, 1.75rem);
   font-weight: 300;
   text-transform: uppercase;
@@ -1081,26 +1085,33 @@ body:has(.inicio-espiral) .idiomas {
   animation-delay: 0.3s;
 }
 
+/* El espaciado entre letras deja un hueco sobrante detrás de la última letra, que
+   descentraría el texto media medida. Se compensa con un padding izquierdo igual al
+   espaciado; como el espaciado se anima, el padding se anima con él. */
 @keyframes espiral-presentar {
   0% {
     opacity: 0;
     letter-spacing: 0.75em;
-    transform: translate(-50%, -50%);
+    padding-left: 0.75em;
+    transform: translateY(-50%);
   }
   45% {
     opacity: 1;
     letter-spacing: 0.3em;
-    transform: translate(-50%, -50%);
+    padding-left: 0.3em;
+    transform: translateY(-50%);
   }
   58% {
     opacity: 1;
     letter-spacing: 0.3em;
-    transform: translate(-50%, -50%);
+    padding-left: 0.3em;
+    transform: translateY(-50%);
   }
   100% {
     opacity: 0;
     letter-spacing: 0.26em;
-    transform: translate(-50%, -50%) scale(1.04);
+    padding-left: 0.26em;
+    transform: translateY(-50%) scale(1.04);
   }
 }
 
