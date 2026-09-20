@@ -10,7 +10,7 @@ interface Props {
 const t = textos[Astro.props.idioma];
 ---
 
-<dialog class="visor" aria-label={t.visor}>
+<dialog class="visor" aria-label={t.visor} tabindex="-1">
   <div class="visor-barra">
     <span class="visor-contador" aria-live="polite"></span>
     <button type="button" class="visor-cerrar">{t.cerrar}</button>
@@ -99,6 +99,11 @@ const t = textos[Astro.props.idioma];
       boton.addEventListener('click', () => {
         mostrar(indice);
         visor.showModal();
+        // Al abrirse, el navegador da el foco al primer botón ("Cerrar") y algunos
+        // lo enmarcan con un recuadro. Se lleva el foco al propio visor: sigue
+        // dentro del diálogo, para el teclado y los lectores de pantalla, pero sin
+        // dibujar nada.
+        visor.focus({ preventScroll: true });
       }),
     );
 

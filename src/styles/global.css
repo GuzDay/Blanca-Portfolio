@@ -76,6 +76,13 @@ button {
   outline-offset: 3px;
 }
 
+/* El visor recibe el foco al abrirse para que no lo reciba ningún botón; como es
+   un contenedor y no un control, no debe enmarcarse */
+.visor:focus,
+.visor:focus-visible {
+  outline: none;
+}
+
 figure {
   margin: 0;
 }
