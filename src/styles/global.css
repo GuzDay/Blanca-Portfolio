@@ -1294,7 +1294,7 @@ body:has(.inicio-espiral) .idiomas {
   .inicio-espiral {
     /* A lo ancho se mide contra el ancho de la ventana (vw), no contra el lado
        corto: así en un monitor grande la elipse se abre en vez de dejar blanco */
-    --radio-x: 1.42vw;
+    --radio-x: 1.3vw;
     --radio-y: 1.45vmin;
   }
 }
