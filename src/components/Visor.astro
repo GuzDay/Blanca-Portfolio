@@ -58,9 +58,6 @@ const t = textos[Astro.props.idioma];
       if (!pincel || !imagen.naturalWidth || !visor.open) return;
       const marco = imagen.getBoundingClientRect();
       if (!marco.width || !marco.height) return;
-      // Dónde empieza la foto dentro del escenario: las flechas se pegan ahí
-      const caja = escenario.getBoundingClientRect();
-      escenario.style.setProperty('--borde-foto', `${Math.max(0, Math.round(marco.left - caja.left))}px`);
       const LADO = 40;
       lienzo.width = LADO;
       lienzo.height = LADO;

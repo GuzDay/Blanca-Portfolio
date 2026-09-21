@@ -829,6 +829,14 @@ html:has(.visor[open]) {
   padding: 0 var(--margen) var(--margen);
 }
 
+/* En ordenador se aparta la foto de los lados lo justo para que las flechas
+   quepan en la franja de fondo sin tocarla nunca */
+@media (min-width: 901px) {
+  .visor-hueco {
+    padding-inline: 5.5rem;
+  }
+}
+
 .visor-imagen,
 .visor-vecina {
   width: auto;
@@ -846,8 +854,8 @@ html:has(.visor[open]) {
   bottom: 0;
   display: flex;
   align-items: center;
-  width: 4.5rem;
-  padding-inline: 0.9rem; /* separadas del borde de la foto */
+  width: 5rem;
+  padding-inline: 1.75rem; /* separadas del borde de la pantalla */
   /* Blancas con una sombra suave: se ven sobre cualquier foto, clara, oscura
      o recargada, sin necesidad de ponerles fondo.
      (Se probó el modo "difference", que invierte el color de la foto, pero
@@ -881,17 +889,16 @@ html:has(.visor[open]) {
   stroke-linejoin: round;
 }
 
-/* Se pegan al borde de la FOTO, no al de la pantalla: el visor mide dónde
-   empieza la foto y lo guarda en --borde-foto. Así quedan siempre encima de
-   ella, sea vertical o apaisada. */
+/* Fijas a los lados de la pantalla, en la franja de fondo: nunca encima de la
+   foto, dé igual que sea vertical o apaisada. */
 .visor-anterior {
-  left: var(--borde-foto, 0px);
+  left: 0;
   justify-content: flex-start;
   cursor: w-resize;
 }
 
 .visor-siguiente {
-  right: var(--borde-foto, 0px);
+  right: 0;
   justify-content: flex-end;
   cursor: e-resize;
 }
