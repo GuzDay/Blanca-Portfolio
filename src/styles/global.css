@@ -854,8 +854,11 @@ html:has(.visor[open]) {
   bottom: 0;
   display: flex;
   align-items: center;
-  width: 5rem;
-  padding-inline: 1.75rem; /* separadas del borde de la pantalla */
+  /* Sin ancho fijo: el botón lo marca el relleno. Con un ancho fijo, al separar
+     las flechas del borde el relleno se comía el dibujo y desaparecía.
+     A media franja: el visor mide el fondo que queda al lado de la foto y las
+     centra ahí, a la misma distancia del borde de la pantalla que de la foto. */
+  padding-inline: var(--flecha-hueco, 2.75rem);
   /* Blancas con una sombra suave: se ven sobre cualquier foto, clara, oscura
      o recargada, sin necesidad de ponerles fondo.
      (Se probó el modo "difference", que invierte el color de la foto, pero

@@ -58,6 +58,16 @@ const t = textos[Astro.props.idioma];
       if (!pincel || !imagen.naturalWidth || !visor.open) return;
       const marco = imagen.getBoundingClientRect();
       if (!marco.width || !marco.height) return;
+      // La flecha se centra en la franja de fondo que queda al lado de la foto:
+      // así queda a la misma distancia del borde de la pantalla que de la foto.
+      // Con fotos verticales esa franja es enorme, así que se pone un tope para
+      // que la flecha no se vaya hacia el medio de la pantalla.
+      const caja = escenario.getBoundingClientRect();
+      const franja = Math.max(0, marco.left - caja.left);
+      const ANCHO_DIBUJO = 17; // lo que mide el chevron
+      const hueco = Math.max(28, Math.min(96, franja / 2 - ANCHO_DIBUJO / 2));
+      escenario.style.setProperty('--flecha-hueco', `${Math.round(hueco)}px`);
+
       const LADO = 40;
       lienzo.width = LADO;
       lienzo.height = LADO;
