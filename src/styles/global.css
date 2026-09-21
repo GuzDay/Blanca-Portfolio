@@ -12,7 +12,7 @@
   --texto: #1a1a1a;
   --gris: #6b6b6b;
   --linea: #e4e0da;
-  --margen: clamp(1rem, 6.5vw, 11rem); /* margen lateral de la página */
+  --margen: clamp(1rem, 8vw, 13rem); /* margen lateral de la página */
   /* El visor a pantalla completa se queda con el margen de antes: allí la foto
      manda y no interesa robarle sitio */
   --margen-visor: clamp(1rem, 3vw, 2.5rem);
