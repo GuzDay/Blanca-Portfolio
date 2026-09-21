@@ -770,6 +770,7 @@ html:has(.visor[open]) {
 .visor {
   width: 100vw;
   height: 100dvh;
+  overflow: hidden; /* las fotos vecinas del carrusel esperan fuera de la pantalla */
   max-width: none;
   max-height: none;
   margin: 0;
@@ -801,15 +802,35 @@ html:has(.visor[open]) {
 
 .visor-escenario {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   min-height: 0;
-  padding: 0 var(--margen) var(--margen);
   touch-action: pan-y;
 }
 
-.visor-imagen {
+/* Fila con las tres fotos. Está corrida una foto a la izquierda para que se vea
+   la del medio; --arrastre es lo que se desplaza mientras mueves el dedo. */
+.visor-carro {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  transform: translate3d(calc(-100% + var(--arrastre, 0px)), 0, 0);
+}
+
+/* Solo al soltar el dedo se anima: mientras arrastras, la foto va con él */
+.visor-carro.deslizando {
+  transition: transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.visor-hueco {
+  flex: 0 0 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 0 var(--margen) var(--margen);
+}
+
+.visor-imagen,
+.visor-vecina {
   width: auto;
   max-width: 100%;
   max-height: calc(100dvh - 5rem);
@@ -825,8 +846,8 @@ html:has(.visor[open]) {
   bottom: 0;
   display: flex;
   align-items: center;
-  width: 30%;
-  padding-inline: calc(var(--margen) + 0.75rem); /* separadas del borde */
+  width: 4.5rem;
+  padding-inline: 0.9rem; /* separadas del borde de la foto */
   /* Blancas con una sombra suave: se ven sobre cualquier foto, clara, oscura
      o recargada, sin necesidad de ponerles fondo.
      (Se probó el modo "difference", que invierte el color de la foto, pero
@@ -860,14 +881,17 @@ html:has(.visor[open]) {
   stroke-linejoin: round;
 }
 
+/* Se pegan al borde de la FOTO, no al de la pantalla: el visor mide dónde
+   empieza la foto y lo guarda en --borde-foto. Así quedan siempre encima de
+   ella, sea vertical o apaisada. */
 .visor-anterior {
-  left: 0;
+  left: var(--borde-foto, 0px);
   justify-content: flex-start;
   cursor: w-resize;
 }
 
 .visor-siguiente {
-  right: 0;
+  right: var(--borde-foto, 0px);
   justify-content: flex-end;
   cursor: e-resize;
 }
@@ -907,11 +931,20 @@ html:has(.visor[open]) {
     padding: 0.9rem 2rem calc(2.6rem + env(safe-area-inset-bottom));
   }
 
-  .visor-escenario {
-    padding-bottom: 0;
+  .visor-hueco {
+    /* A todo el ancho: en una pantalla estrecha cada píxel cuenta */
+    padding: 0;
   }
 
-  .visor-imagen {
+  /* En el móvil se pasa de foto deslizando, y el contador ya dice que hay más.
+     Las flechas solo estorbaban encima de la foto. */
+  .visor-anterior,
+  .visor-siguiente {
+    display: none;
+  }
+
+  .visor-imagen,
+  .visor-vecina {
     max-height: calc(100dvh - 12rem);
   }
 }

@@ -16,7 +16,14 @@ const t = textos[Astro.props.idioma];
     <button type="button" class="visor-cerrar">{t.cerrar}</button>
   </div>
   <div class="visor-escenario">
-    <img class="visor-imagen" alt="" />
+    {/* Tres huecos: la foto anterior, la actual y la siguiente. El carro se
+        desplaza para que siempre se vea la del medio; al arrastrar, las vecinas
+        asoman por los lados como en un carrusel. */}
+    <div class="visor-carro">
+      <div class="visor-hueco"><img class="visor-vecina" data-lado="antes" alt="" aria-hidden="true" /></div>
+      <div class="visor-hueco"><img class="visor-imagen" alt="" /></div>
+      <div class="visor-hueco"><img class="visor-vecina" data-lado="despues" alt="" aria-hidden="true" /></div>
+    </div>
     <button type="button" class="visor-anterior" aria-label={t.anterior}>
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4 7 12l8 8" /></svg>
     </button>
@@ -51,6 +58,9 @@ const t = textos[Astro.props.idioma];
       if (!pincel || !imagen.naturalWidth || !visor.open) return;
       const marco = imagen.getBoundingClientRect();
       if (!marco.width || !marco.height) return;
+      // Dónde empieza la foto dentro del escenario: las flechas se pegan ahí
+      const caja = escenario.getBoundingClientRect();
+      escenario.style.setProperty('--borde-foto', `${Math.max(0, Math.round(marco.left - caja.left))}px`);
       const LADO = 40;
       lienzo.width = LADO;
       lienzo.height = LADO;
@@ -80,18 +90,59 @@ const t = textos[Astro.props.idioma];
       }
     };
 
+    const carro = visor.querySelector<HTMLElement>('.visor-carro')!;
+    const vecinaAntes = visor.querySelector<HTMLImageElement>('[data-lado="antes"]')!;
+    const vecinaDespues = visor.querySelector<HTMLImageElement>('[data-lado="despues"]')!;
+
+    const pintar = (destino: HTMLImageElement, indice: number, conTexto: boolean) => {
+      const origen = botones[(indice + botones.length) % botones.length].querySelector('img');
+      if (!origen) return;
+      destino.sizes = '100vw';
+      destino.srcset = origen.srcset;
+      destino.src = origen.src;
+      // Las vecinas no llevan texto alternativo: las anunciaría por duplicado
+      if (conTexto) destino.alt = origen.alt;
+    };
+
+    const colocar = (px: number) => carro.style.setProperty('--arrastre', `${px}px`);
+
     const mostrar = (indice: number) => {
       actual = (indice + botones.length) % botones.length;
-      const origen = botones[actual].querySelector('img');
-      if (!origen) return;
-      imagen.sizes = '100vw';
-      imagen.srcset = origen.srcset;
-      imagen.src = origen.src;
-      imagen.alt = origen.alt;
+      carro.classList.remove('deslizando');
+      colocar(0);
+      pintar(imagen, actual, true);
+      pintar(vecinaAntes, actual - 1, false);
+      pintar(vecinaDespues, actual + 1, false);
       imagen.style.transition = 'none';
       imagen.style.transform = ''; // que la nueva foto no herede la ampliación
       contador.textContent = `${actual + 1} / ${botones.length}`;
       requestAnimationFrame(ajustarFlechas);
+    };
+
+    // Cambio de foto con la animación del carrusel: la actual se va por un lado
+    // y la vecina ocupa su sitio. Al terminar se recolocan las tres.
+    let deslizando = false;
+    const deslizar = (direccion: number) => {
+      if (deslizando || botones.length < 2) return;
+      const ancho = carro.getBoundingClientRect().width;
+      if (!ancho) {
+        mostrar(actual + direccion);
+        return;
+      }
+      deslizando = true;
+      carro.classList.add('deslizando');
+      colocar(-direccion * ancho);
+      const terminar = () => {
+        if (!deslizando) return;
+        deslizando = false;
+        carro.removeEventListener('transitionend', alTerminar);
+        mostrar(actual + direccion);
+      };
+      const alTerminar = (evento: TransitionEvent) => {
+        if (evento.target === carro) terminar();
+      };
+      carro.addEventListener('transitionend', alTerminar);
+      window.setTimeout(terminar, 600); // por si la animación no avisa
     };
 
     imagen.addEventListener('load', ajustarFlechas);
@@ -110,32 +161,66 @@ const t = textos[Astro.props.idioma];
     );
 
     visor.querySelector('.visor-cerrar')?.addEventListener('click', () => visor.close());
-    visor.querySelector('.visor-anterior')?.addEventListener('click', () => mostrar(actual - 1));
-    visor.querySelector('.visor-siguiente')?.addEventListener('click', () => mostrar(actual + 1));
+    visor.querySelector('.visor-anterior')?.addEventListener('click', () => deslizar(-1));
+    visor.querySelector('.visor-siguiente')?.addEventListener('click', () => deslizar(1));
     if (botones.length < 2) visor.classList.add('una-foto');
 
     visor.addEventListener('keydown', (evento) => {
-      if (evento.key === 'ArrowLeft') mostrar(actual - 1);
-      if (evento.key === 'ArrowRight') mostrar(actual + 1);
+      if (evento.key === 'ArrowLeft') deslizar(-1);
+      if (evento.key === 'ArrowRight') deslizar(1);
     });
 
-    // Deslizar con el dedo
+    // Arrastrar para cambiar de foto: la foto acompaña al dedo y, al soltar,
+    // o termina de pasar o vuelve a su sitio.
+    let pellizcoInicial = 0; // distinto de cero mientras se pellizca con dos dedos
     let inicioX: number | null = null;
+    let arrastre = 0;
     let huboDeslizamiento = false;
+
     escenario.addEventListener('pointerdown', (evento) => {
+      if (botones.length < 2 || deslizando || pellizcoInicial) return;
+      if (inicioX !== null) {
+        // Ha entrado un segundo dedo: esto ya no es un arrastre
+        inicioX = null;
+        colocar(0);
+        return;
+      }
       inicioX = evento.clientX;
+      arrastre = 0;
       huboDeslizamiento = false;
+      carro.classList.remove('deslizando');
     });
-    escenario.addEventListener('pointerup', (evento) => {
+
+    escenario.addEventListener('pointermove', (evento) => {
       if (inicioX === null) return;
-      const distancia = evento.clientX - inicioX;
-      inicioX = null;
-      huboDeslizamiento = Math.abs(distancia) > 10;
-      if (Math.abs(distancia) > 50) mostrar(distancia < 0 ? actual + 1 : actual - 1);
+      if (pellizcoInicial) {
+        inicioX = null;
+        colocar(0);
+        return;
+      }
+      arrastre = evento.clientX - inicioX;
+      if (Math.abs(arrastre) > 8) huboDeslizamiento = true;
+      colocar(arrastre);
     });
+
+    const soltarArrastre = () => {
+      if (inicioX === null) return;
+      inicioX = null;
+      const ancho = carro.getBoundingClientRect().width || 1;
+      // Con recorrer una quinta parte de la pantalla ya pasa de foto
+      const umbral = Math.min(70, ancho * 0.2);
+      carro.classList.add('deslizando');
+      if (arrastre <= -umbral) deslizar(1);
+      else if (arrastre >= umbral) deslizar(-1);
+      else colocar(0);
+      arrastre = 0;
+    };
+
+    escenario.addEventListener('pointerup', soltarArrastre);
+    escenario.addEventListener('pointercancel', soltarArrastre);
+    escenario.addEventListener('pointerleave', soltarArrastre);
 
     // Ampliar la foto pellizcando con dos dedos. Al soltar, vuelve a su tamaño sola.
-    let pellizcoInicial = 0;
     const AMPLIACION_MAXIMA = 4;
 
     const separacion = (dedos: TouchList) =>
