@@ -12,7 +12,10 @@
   --texto: #1a1a1a;
   --gris: #6b6b6b;
   --linea: #e4e0da;
-  --margen: clamp(1rem, 3vw, 2.5rem); /* margen lateral de la página */
+  --margen: clamp(1rem, 3.5vw, 5rem); /* margen lateral de la página */
+  /* El visor a pantalla completa se queda con el margen de antes: allí la foto
+     manda y no interesa robarle sitio */
+  --margen-visor: clamp(1rem, 3vw, 2.5rem);
   --hueco: clamp(0.5rem, 1.2vw, 1.25rem); /* separación entre fotos */
   --ancho-max: 1440px;
   --fuente: 'Geist Variable', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
@@ -792,7 +795,7 @@ html:has(.visor[open]) {
 .visor-barra {
   display: flex;
   justify-content: space-between;
-  padding: 1rem var(--margen);
+  padding: 1rem var(--margen-visor);
   font-size: 0.8125rem;
 }
 
@@ -826,7 +829,7 @@ html:has(.visor[open]) {
   align-items: center;
   justify-content: center;
   min-width: 0;
-  padding: 0 var(--margen) var(--margen);
+  padding: 0 var(--margen-visor) var(--margen-visor);
 }
 
 /* En ordenador se aparta la foto de los lados lo justo para que las flechas
@@ -930,7 +933,7 @@ html:has(.visor[open]) {
   .visor-contador {
     grid-row: 1;
     /* Separado del borde de arriba, no pegado a él */
-    padding: 2.6rem var(--margen) 0.5rem;
+    padding: 2.6rem var(--margen-visor) 0.5rem;
     text-align: center;
   }
 
@@ -944,7 +947,7 @@ html:has(.visor[open]) {
   .visor-hueco {
     /* Un filo de fondo a los lados: la foto no se pega al borde de la pantalla.
        Abajo no hace falta, que ahí está el botón de cerrar. */
-    padding: 0 var(--margen) 0;
+    padding: 0 var(--margen-visor) 0;
   }
 
   /* En el móvil se pasa de foto deslizando, y el contador ya dice que hay más.
