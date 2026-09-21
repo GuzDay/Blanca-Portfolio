@@ -932,8 +932,9 @@ html:has(.visor[open]) {
   }
 
   .visor-hueco {
-    /* A todo el ancho: en una pantalla estrecha cada píxel cuenta */
-    padding: 0;
+    /* Un filo de fondo a los lados: la foto no se pega al borde de la pantalla.
+       Abajo no hace falta, que ahí está el botón de cerrar. */
+    padding: 0 var(--margen) 0;
   }
 
   /* En el móvil se pasa de foto deslizando, y el contador ya dice que hay más.
