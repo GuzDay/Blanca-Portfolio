@@ -1,0 +1,35 @@
+---
+// Correo y teléfono sin dejarlos escritos en el código de la página.
+//
+// Los robots que recogen direcciones para mandar spam rastrean dos cosas: los
+// enlaces "mailto:" y cualquier texto con forma de correo. Aquí no hay ninguna
+// de las dos: la dirección viaja al revés y codificada, la arroba la pone el
+// CSS (así no aparece junto al resto) y el enlace lo monta el navegador al
+// cargar la página. Para quien la visita no cambia nada.
+interface Props {
+  tipo: 'correo' | 'telefono';
+  valor: string;
+}
+
+const { tipo, valor } = Astro.props;
+const cifrado = Buffer.from([...valor].reverse().join(''), 'utf8').toString('base64');
+const [usuario, dominio] = tipo === 'correo' ? valor.split('@') : [valor, ''];
+---
+
+<span class="contacto-oculto" data-tipo={tipo} data-c={cifrado}>
+  {usuario}{tipo === 'correo' && <i class="contacto-arroba" aria-hidden="true"></i>}{dominio}
+</span>
+
+<script>
+  // Reconstruye la dirección y la convierte en un enlace normal y corriente
+  for (const hueco of document.querySelectorAll<HTMLElement>('.contacto-oculto')) {
+    const cifrado = hueco.dataset.c;
+    if (!cifrado) continue;
+    const valor = atob(cifrado).split('').reverse().join('');
+    const enlace = document.createElement('a');
+    enlace.href =
+      hueco.dataset.tipo === 'correo' ? `mailto:${valor}` : `tel:${valor.replace(/\s+/g, '')}`;
+    enlace.textContent = valor;
+    hueco.replaceWith(enlace);
+  }
+</script>

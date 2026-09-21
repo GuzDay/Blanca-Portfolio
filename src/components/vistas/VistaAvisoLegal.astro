@@ -1,4 +1,5 @@
 ---
+import ContactoOculto from '../ContactoOculto.astro';
 // Texto orientativo. Revisadlo (idealmente con una gestoría o abogado) antes de publicar.
 import Base from '../../layouts/Base.astro';
 import type { Idioma } from '../../i18n/categorias';
@@ -30,7 +31,7 @@ const t = textos[idioma];
             <li>Titular: {ajustes.titular}</li>
             <li>NIF: {ajustes.nif}</li>
             <li>Domicilio: {ajustes.domicilio}</li>
-            <li>Email: {ajustes.email}</li>
+            <li>Email: <ContactoOculto tipo="correo" valor={ajustes.email} /></li>
           </ul>
           <h2>Propiedad intelectual</h2>
           <p>Todas las fotografías y vídeos de esta web son obra de {ajustes.nombre} y están protegidos por la legislación de propiedad intelectual. No se permite su reproducción, distribución, comunicación pública ni transformación, total o parcial, sin autorización expresa y por escrito.</p>
@@ -48,7 +49,7 @@ const t = textos[idioma];
             <li>Owner: {ajustes.titular}</li>
             <li>Tax ID (NIF): {ajustes.nif}</li>
             <li>Address: {ajustes.domicilio}</li>
-            <li>Email: {ajustes.email}</li>
+            <li>Email: <ContactoOculto tipo="correo" valor={ajustes.email} /></li>
           </ul>
           <h2>Intellectual property</h2>
           <p>All photographs and videos on this website are the work of {ajustes.nombre} and are protected by intellectual property law. They may not be reproduced, distributed, publicly communicated or modified, in whole or in part, without express written permission.</p>

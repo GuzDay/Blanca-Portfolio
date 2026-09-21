@@ -432,6 +432,12 @@ html:has(.menu-abierto) {
   }
 }
 
+/* La arroba del correo la pone el CSS: así no queda escrita junto al resto de
+   la dirección y los robots que buscan correos no la reconocen */
+.contacto-arroba::before {
+  content: '@';
+}
+
 /* ---------- Pie ---------- */
 
 .pie {

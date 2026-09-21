@@ -1,4 +1,5 @@
 ---
+import ContactoOculto from './ContactoOculto.astro';
 import type { Idioma } from '../i18n/categorias';
 import { textos } from '../i18n/textos';
 import { ajustes } from '../lib/contenido';
@@ -15,7 +16,7 @@ const año = new Date().getFullYear();
 
 <footer class="pie">
   <div>
-    <a href={`mailto:${ajustes.email}`}>{ajustes.email}</a>
+    <ContactoOculto tipo="correo" valor={ajustes.email} />
     <a href={`https://www.instagram.com/${ajustes.instagram}/`} target="_blank" rel="noopener">Instagram</a>
   </div>
   <div>
