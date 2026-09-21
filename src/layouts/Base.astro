@@ -58,6 +58,27 @@ const persona = {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      // Red de seguridad. Cada vez que se publica, la hoja de estilos cambia de
+      // nombre y la anterior desaparece. Si el navegador tenía guardada una
+      // página de antes, pide un archivo que ya no existe y la web se ve sin
+      // estilos. Aquí se detecta y se recarga una sola vez.
+      addEventListener(
+        'error',
+        function (evento) {
+          var el = evento.target;
+          if (!el || el.tagName !== 'LINK' || el.rel !== 'stylesheet') return;
+          try {
+            if (sessionStorage.getItem('estilos-recargados')) return;
+            sessionStorage.setItem('estilos-recargados', '1');
+          } catch (_) {
+            return; // sin almacenamiento no se recarga, para no entrar en bucle
+          }
+          location.reload();
+        },
+        true,
+      );
+    </script>
     <title>{tituloCompleto}</title>
     <meta name="description" content={descripcion} />
     <link rel="canonical" href={absoluta(alternativas[idioma])} />
