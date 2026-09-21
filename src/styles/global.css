@@ -12,7 +12,7 @@
   --texto: #1a1a1a;
   --gris: #6b6b6b;
   --linea: #e4e0da;
-  --margen: clamp(1rem, 3.5vw, 5rem); /* margen lateral de la página */
+  --margen: clamp(1rem, 4.5vw, 7rem); /* margen lateral de la página */
   /* El visor a pantalla completa se queda con el margen de antes: allí la foto
      manda y no interesa robarle sitio */
   --margen-visor: clamp(1rem, 3vw, 2.5rem);
@@ -1300,6 +1300,13 @@ body:has(.inicio-espiral) .idiomas {
 }
 
 /* En móvil se queda el círculo de siempre: ahí sobra alto, no ancho */
+/* En el móvil el margen se queda como estaba: ahí no sobra sitio a los lados */
+@media (max-width: 700px) {
+  :root {
+    --margen: 1rem;
+  }
+}
+
 @media (max-width: 700px) {
   .inicio-espiral {
     --vuelta: 150s;
