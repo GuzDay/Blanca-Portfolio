@@ -88,6 +88,8 @@ const t = textos[Astro.props.idioma];
       imagen.srcset = origen.srcset;
       imagen.src = origen.src;
       imagen.alt = origen.alt;
+      imagen.style.transition = 'none';
+      imagen.style.transform = ''; // que la nueva foto no herede la ampliación
       contador.textContent = `${actual + 1} / ${botones.length}`;
       requestAnimationFrame(ajustarFlechas);
     };
@@ -131,6 +133,59 @@ const t = textos[Astro.props.idioma];
       huboDeslizamiento = Math.abs(distancia) > 10;
       if (Math.abs(distancia) > 50) mostrar(distancia < 0 ? actual + 1 : actual - 1);
     });
+
+    // Ampliar la foto pellizcando con dos dedos. Al soltar, vuelve a su tamaño sola.
+    let pellizcoInicial = 0;
+    const AMPLIACION_MAXIMA = 4;
+
+    const separacion = (dedos: TouchList) =>
+      Math.hypot(dedos[0].clientX - dedos[1].clientX, dedos[0].clientY - dedos[1].clientY);
+
+    const soltarPellizco = () => {
+      if (!pellizcoInicial) return;
+      pellizcoInicial = 0;
+      imagen.style.transition = 'transform 0.25s ease';
+      imagen.style.transform = '';
+    };
+
+    escenario.addEventListener(
+      'touchstart',
+      (evento) => {
+        if (evento.touches.length !== 2) return;
+        inicioX = null; // dos dedos no son un deslizamiento para pasar de foto
+        pellizcoInicial = separacion(evento.touches);
+        // Se amplía por donde pellizcas, no por el centro de la foto
+        const caja = imagen.getBoundingClientRect();
+        const x = (evento.touches[0].clientX + evento.touches[1].clientX) / 2;
+        const y = (evento.touches[0].clientY + evento.touches[1].clientY) / 2;
+        imagen.style.transformOrigin = `${((x - caja.left) / caja.width) * 100}% ${((y - caja.top) / caja.height) * 100}%`;
+        imagen.style.transition = 'none';
+      },
+      { passive: true },
+    );
+
+    escenario.addEventListener(
+      'touchmove',
+      (evento) => {
+        if (evento.touches.length !== 2 || !pellizcoInicial) return;
+        evento.preventDefault(); // si no, el navegador amplía la página entera
+        const escala = Math.min(
+          AMPLIACION_MAXIMA,
+          Math.max(1, separacion(evento.touches) / pellizcoInicial),
+        );
+        imagen.style.transform = `scale(${escala})`;
+      },
+      { passive: false },
+    );
+
+    escenario.addEventListener('touchend', soltarPellizco);
+    escenario.addEventListener('touchcancel', soltarPellizco);
+
+    // Safari en iPhone tiene además su propio zoom de dos dedos, que ampliaría la
+    // página entera por encima del visor. Dentro del visor se desactiva.
+    for (const gesto of ['gesturestart', 'gesturechange', 'gestureend']) {
+      visor.addEventListener(gesto, (evento) => evento.preventDefault());
+    }
 
     // Tocar fuera de la foto también cierra (la foto, las flechas y los botones no)
     visor.addEventListener('click', (evento) => {
