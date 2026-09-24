@@ -2,17 +2,19 @@
 # Cada línea es: categoría/proyecto/archivo  (tal como están las carpetas dentro de contenido/proyectos)
 # Al pulsar una foto se abre su categoría.
 #
-# Diez fotos repartidas entre las categorías, mitad verticales y mitad apaisadas.
+# Doce fotos: dos de cada categoría, alternando vertical y apaisada.
 # Cámbialas por las que queráis.
 
 fotos:
   - moda/basyco-estudio/08.jpg
-  - interiorismo/yuxus-tienda-de-ropa/01.jpg
   - musica/juicy-sessions-sesion-de-musica/18.jpg
+  - interiorismo/yuxus-tienda-de-ropa/01.jpg
   - viajes/copenhague/03.jpg
-  - eventos/elena-y-geza-boda/02.jpg
+  - eventos/renera-evento-comida/01.jpg
   - foto-fija/cold-culture/01.jpg
   - moda/white-y-one-1/04.jpg
-  - viajes/tailandia/02.jpg
+  - interiorismo/invernaderos-estudio-de-musica/01.jpg
   - musica/juicy-sessions-sesion-de-musica/02.jpg
-  - eventos/renera-evento-comida/01.jpg
+  - eventos/elena-y-geza-boda/02.jpg
+  - viajes/tailandia/02.jpg
+  - foto-fija/cold-culture/05.jpg
