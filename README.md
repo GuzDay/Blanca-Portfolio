@@ -77,6 +77,20 @@ Para **quitar** un proyecto, borra su carpeta (y sus fotos de `home.yaml` si las
 
 ---
 
+## Volcar todas las fotos de golpe
+
+Cuando reorganices la carpeta de originales (`Fotos portfolio Blanquit`), puedes volcarla entera de una vez:
+
+```sh
+npm run importar -- "/ruta/a/Fotos portfolio Blanquit"
+```
+
+Coge cada carpeta de categoría y de proyecto, optimiza las fotos a 2500 px y las renombra a `01.jpg`, `02.jpg`… por orden. También actualiza el retrato de Contacto.
+
+**Ojo:** la web queda igual que esa carpeta. Lo que no esté allí se borra de la web, así que revisa luego `contenido/home.yaml` por si alguna foto de la portada ha cambiado de número. Los vídeos no se importan: avisa de cuáles se ha saltado para que los comprimas antes (máximo 50 MB).
+
+Las carpetas de origen se llaman así: `Moda/04 Basyco - Estudio/Basyco 3.jpg`. El número de delante marca el orden dentro de la categoría y el resto del nombre es el título del proyecto.
+
 ## Ver la web en tu ordenador
 
 Solo la primera vez, instala [Node.js](https://nodejs.org) (versión LTS) y, en la carpeta del proyecto, ejecuta:
