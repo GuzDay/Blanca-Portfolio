@@ -1,5 +1,5 @@
 ---
-// PRUEBA: fotos pequeñas cayendo de arriba abajo, como lluvia.
+// Fotos pequeñas cayendo de arriba abajo, como lluvia, en la página de Contacto.
 // Cada una cae a su ritmo, con un poco de deriva lateral, y se desvanece al
 // entrar y al salir. Van por detrás del contenido de la página.
 import Foto from './Foto.astro';
@@ -32,7 +32,7 @@ const fotos = Array.from({ length: GOTAS }, (_, i) => fotosInicio[i % fotosInici
     // El ratón manda en la velocidad: arriba del todo caen muy rápido y, según
     // baja, se van frenando hasta quedarse casi suspendidas.
     const RAPIDO = 4.5;
-    const LENTO = 0.25;
+    const LENTO = 0.07;
     const cayendo = new Set<Animation>();
     let velocidad = 1;
 
@@ -86,7 +86,9 @@ const fotos = Array.from({ length: GOTAS }, (_, i) => fotosInicio[i % fotosInici
       caer();
       // Con la lluvia lenta caen menos fotos, y con la rápida más: así la
       // pantalla no se queda vacía ni se atasca
-      setTimeout(ciclo, azar(280, 620) / velocidad);
+      // El ritmo acompaña a la velocidad, pero con un tope: aunque la lluvia vaya
+      // lentísima, siguen apareciendo fotos y la pantalla no se queda vacía
+      setTimeout(ciclo, azar(280, 620) / Math.max(velocidad, 0.45));
     };
     setTimeout(ciclo, 300);
   }

@@ -974,11 +974,11 @@ html:has(.visor[open]) {
 /* Foto pequeña y centrada, y debajo los datos de contacto */
 .contacto {
   position: relative;
-  z-index: 1; /* por delante de las fotos de fondo */
   /* "main" ocupa el hueco entre cabecera y pie, que miden distinto, así que
-     centrar ahí deja la foto unos píxeles alta. Se corrige con la mitad de esa
-     diferencia para que la foto quede en el centro exacto de la pantalla. */
-  transform: translateY(calc((var(--alto-pie, 0px) - var(--alto-cabecera, 0px)) / 2));
+     centrar ahí deja la foto unos píxeles alta. Se corrige con un margen (al
+     centrar, el margen cuenta a medias) en vez de con "transform", que crearía
+     una capa aparte y dejaría el texto sin nada con lo que mezclarse. */
+  margin-top: calc(var(--alto-pie, 0px) - var(--alto-cabecera, 0px));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1043,7 +1043,7 @@ body:has(.contacto) main {
   /* Como el pie ya no cuenta, la foto se centra respecto a la pantalla subiendo
      media cabecera */
   .contacto {
-    transform: translateY(calc(var(--alto-cabecera, 0px) / -2));
+    margin-top: calc(var(--alto-cabecera, 0px) * -1);
   }
 }
 
@@ -1433,13 +1433,14 @@ body:has(.inicio-espiral) .idiomas {
   }
 }
 
-/* ---------- PRUEBA: fotos cayendo como lluvia (página /pruebas/lluvia) ----------
-   Si no se usa, se puede borrar este bloque junto con LluviaPrueba.astro */
+/* ---------- Lluvia de fotos (página de Contacto) ---------- */
 
 .lluvia {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  /* Por debajo del contenido, pero sin crear una capa aparte para él: así el
+     texto en modo "diferencia" puede mezclarse con las fotos que pasan */
+  z-index: -1;
   overflow: hidden;
   pointer-events: none;
 }
@@ -1455,10 +1456,11 @@ body:has(.inicio-espiral) .idiomas {
   height: auto;
 }
 
-/* Con la lluvia detrás, los datos llevan un halo del color del fondo para que se
-   lean aunque pase una foto por detrás */
-body:has(.lluvia) .contacto-datos {
-  text-shadow:
-    0 0 14px var(--fondo),
-    0 0 6px var(--fondo);
+/* Los datos se mezclan en modo "diferencia" con lo que tengan detrás: sobre el
+   fondo claro se leen casi negros y, cuando pasa una foto oscura, se vuelven
+   claros. Un resplandor muy leve los despega en los tonos intermedios. */
+.contacto-datos {
+  color: #fff;
+  mix-blend-mode: difference;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.25);
 }

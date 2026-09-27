@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import BloqueContacto from '../BloqueContacto.astro';
+import Lluvia from '../Lluvia.astro';
 import type { Idioma } from '../../i18n/categorias';
 import { textos } from '../../i18n/textos';
 import { retrato } from '../../lib/contenido';
@@ -22,5 +23,6 @@ const t = textos[idioma];
   seccion="contacto"
   datosEstructurados
 >
+  <Lluvia />
   <BloqueContacto idioma={idioma} />
 </Base>
