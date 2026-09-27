@@ -1316,7 +1316,9 @@ body:has(.inicio-espiral) .idiomas {
 @media (max-width: 700px) {
   .inicio-espiral {
     --vuelta: 150s;
-    --foto: 2.2vmin;
+    /* Fotos más pequeñas que en ordenador: en el móvil hay poco sitio y, con
+       doce, a mayor tamaño se amontonan y se salen por los bordes */
+    --foto: 1.5vmin;
     --radio: 2.1vmin;
   }
 
