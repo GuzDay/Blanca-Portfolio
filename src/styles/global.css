@@ -974,6 +974,7 @@ html:has(.visor[open]) {
 /* Foto pequeña y centrada, y debajo los datos de contacto */
 .contacto {
   position: relative;
+  z-index: 1; /* por delante de las fotos de fondo */
   /* "main" ocupa el hueco entre cabecera y pie, que miden distinto, así que
      centrar ahí deja la foto unos píxeles alta. Se corrige con la mitad de esa
      diferencia para que la foto quede en el centro exacto de la pantalla. */
@@ -1049,6 +1050,7 @@ body:has(.contacto) main {
 /* En Contacto el pie es solo el copyright: va centrado y más pegado abajo */
 .pie-minimo {
   justify-content: center;
+  opacity: 0.55; /* el copyright, más discreto */
   padding-top: 1rem;
   padding-bottom: 1rem;
 }
@@ -1429,4 +1431,52 @@ body:has(.inicio-espiral) .idiomas {
   .inicio-espiral {
     margin-bottom: 2.5rem;
   }
+}
+
+/* ---------- PRUEBA: fotos con efecto de gota de agua (página /pruebas/gotas) ----------
+   Si no se usa, se puede borrar este bloque entero junto con GotasPrueba.astro */
+
+.gotas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.gotas-filtros {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+.gota {
+  position: absolute;
+  opacity: 0;
+  /* Se abre en círculo desde el centro, como la onda de una gota */
+  clip-path: circle(0% at 50% 50%);
+  transform: scale(0.96);
+  transition:
+    opacity 0.9s ease,
+    clip-path 1.2s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 1.2s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.gota.se-ve {
+  opacity: 1;
+  clip-path: circle(75% at 50% 50%);
+  transform: scale(1);
+}
+
+.gota.se-va {
+  opacity: 0;
+  transform: scale(1.04);
+  transition:
+    opacity 1s ease,
+    transform 1s ease;
+}
+
+.gota img {
+  width: 100%;
+  height: auto;
 }

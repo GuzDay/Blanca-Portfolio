@@ -1,0 +1,97 @@
+---
+// Foto de Blanca y sus datos de contacto. Va en la página de Contacto y en las
+// pruebas de la portada animada.
+import ContactoOculto from './ContactoOculto.astro';
+import Foto from './Foto.astro';
+import type { Idioma } from '../i18n/categorias';
+import { textos } from '../i18n/textos';
+import { ajustes, retrato } from '../lib/contenido';
+
+interface Props {
+  idioma: Idioma;
+}
+
+const { idioma } = Astro.props;
+const t = textos[idioma];
+---
+
+  <div class="contacto">
+    <h1 class="visualmente-oculto">{t.contacto}</h1>
+    {
+      retrato && (
+        <div class="contacto-retrato">
+          <Foto imagen={retrato} alt={ajustes.nombre} sizes="(max-width: 700px) 160px, 240px" prioridad />
+        </div>
+      )
+    }
+    <ul class="contacto-datos">
+      <li><ContactoOculto tipo="correo" valor={ajustes.email} /></li>
+      <li>
+        <a href={`https://www.instagram.com/${ajustes.instagram}/`} target="_blank" rel="noopener">@{ajustes.instagram}</a>
+      </li>
+      {
+        ajustes.telefono && (
+          <li>
+            <ContactoOculto tipo="telefono" valor={ajustes.telefono} />
+          </li>
+        )
+      }
+    </ul>
+  </div>
+
+<script>
+  // Los datos se escriben letra a letra, como si alguien los tecleara.
+  // El correo y el teléfono los monta antes ContactoOculto (los guarda cifrados
+  // para el spam), así que primero se espera a que estén puestos.
+  const lista = document.querySelector<HTMLElement>('.contacto-datos');
+  const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (lista && !quieto) {
+    const lineas = [...lista.querySelectorAll<HTMLElement>('li')];
+    const pausa = (ms: number) => new Promise((sigue) => setTimeout(sigue, ms));
+    const esperar = () =>
+      new Promise<void>((listo) => {
+        let intentos = 120; // ~2 segundos como mucho
+        const mirar = () => {
+          if (lineas.every((li) => li.querySelector('a')) || intentos-- <= 0) listo();
+          else requestAnimationFrame(mirar);
+        };
+        mirar();
+      });
+
+    // Cuánto se tarda en pulsar la siguiente tecla: nunca dos iguales, y algo más
+    // de tiempo donde uno dudaría (la arroba, los puntos, los espacios).
+    const tecla = (letra: string) => {
+      const base = 19 + Math.random() * 28;
+      if (letra === '@') return base + 75;
+      if (letra === '.' || letra === ' ') return base + 45;
+      return base;
+    };
+
+    (async () => {
+      await esperar();
+      const textos = lineas.map((li) => (li.querySelector('a') ?? li).textContent ?? '');
+
+      // Se guarda el sitio que ocupa cada línea para que no baile al escribirse
+      lineas.forEach((li, i) => {
+        const destino = li.querySelector('a') ?? li;
+        li.style.width = `${destino.getBoundingClientRect().width}px`;
+        destino.setAttribute('aria-label', textos[i]);
+        destino.textContent = '';
+      });
+      lista.classList.add('escrita');
+
+      await pausa(160);
+      for (const [i, li] of lineas.entries()) {
+        const destino = li.querySelector('a') ?? li;
+        li.classList.add('escribiendo');
+        for (const letra of textos[i]) {
+          destino.textContent += letra;
+          await pausa(tecla(letra));
+        }
+        li.classList.remove('escribiendo');
+        await pausa(130); // respiro antes de la siguiente línea
+      }
+    })();
+  }
+</script>

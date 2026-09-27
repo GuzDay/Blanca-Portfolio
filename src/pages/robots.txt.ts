@@ -9,6 +9,7 @@ export const GET: APIRoute = ({ site }) => {
   const mapa = new URL(`${base}sitemap.xml`, site).href;
   const texto = `User-agent: *
 Allow: /
+Disallow: ${base}pruebas/
 
 Sitemap: ${mapa}
 `;
