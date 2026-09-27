@@ -185,11 +185,37 @@ const piezas = colocadas.map((pieza) => ({
       rotulo.classList.remove('se-ve');
     };
 
+    // En una pantalla táctil no hay "pasar por encima": el primer toque enseña el
+    // nombre de la categoría y el segundo, sobre esa misma foto, entra en ella.
+    const sinRaton = matchMedia('(hover: none)');
+    let tocada: HTMLElement | null = null;
+
+    const soltarTocada = () => {
+      tocada?.classList.remove('tocada');
+      tocada = null;
+      esconder();
+    };
+
     for (const pieza of espiral.querySelectorAll<HTMLElement>('.espiral-pieza')) {
       pieza.addEventListener('mouseenter', () => mostrar(pieza));
       pieza.addEventListener('mouseleave', esconder);
       pieza.addEventListener('focusin', () => mostrar(pieza));
       pieza.addEventListener('focusout', esconder);
+
+      pieza.querySelector('a')?.addEventListener('click', (evento) => {
+        if (!sinRaton.matches || tocada === pieza) return; // con ratón, o ya elegida: entra
+        evento.preventDefault();
+        tocada?.classList.remove('tocada');
+        tocada = pieza;
+        pieza.classList.add('tocada');
+        mostrar(pieza);
+      });
     }
+
+    // Tocar fuera de las fotos quita el nombre
+    document.addEventListener('click', (evento) => {
+      if (!sinRaton.matches || !tocada) return;
+      if (!(evento.target as HTMLElement).closest('.espiral-pieza')) soltarTocada();
+    });
   }
 </script>

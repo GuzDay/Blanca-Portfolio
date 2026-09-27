@@ -1303,9 +1303,10 @@ body:has(.inicio-espiral) .idiomas {
   transition: opacity 0.45s ease;
 }
 
-/* La foto señalada pasa por delante de todas y se acerca un poco */
+/* La foto señalada (o tocada, en el móvil) pasa por delante y se acerca un poco */
 .espiral-pieza:hover,
-.espiral-pieza:focus-within {
+.espiral-pieza:focus-within,
+.espiral-pieza.tocada {
   z-index: 2;
   --zoom: 1.08;
 }
@@ -1316,7 +1317,8 @@ body:has(.inicio-espiral) .idiomas {
 }
 
 .espiral-pieza:hover img,
-.espiral-pieza:focus-within img {
+.espiral-pieza:focus-within img,
+.espiral-pieza.tocada img {
   filter: brightness(0.72);
 }
 
@@ -1456,13 +1458,10 @@ body:has(.inicio-espiral) .idiomas {
   height: auto;
 }
 
-/* Con la lluvia detrás, los datos van en el color de siempre y con un halo del
-   color del fondo: así se leen igual pase lo que pase por detrás.
+/* Los datos van en el color de siempre, sin sombra ni resplandor.
    (Se probó el modo "diferencia", pero dejaba el texto blanco o descolorido
-   según la foto que pasara, sobre todo en el móvil.) */
+   según la foto que pasara por detrás, sobre todo en el móvil.) */
 .contacto-datos {
   color: var(--texto);
-  text-shadow:
-    0 0 14px var(--fondo),
-    0 0 6px var(--fondo);
+  text-shadow: none;
 }

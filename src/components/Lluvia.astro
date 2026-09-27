@@ -5,7 +5,7 @@
 import Foto from './Foto.astro';
 import { fotosInicio } from '../lib/contenido';
 
-const GOTAS = 16; // cuántas fotos hay en el aire como mucho
+const GOTAS = 24; // cuántas fotos hay en el aire como mucho
 const fotos = Array.from({ length: GOTAS }, (_, i) => fotosInicio[i % fotosInicio.length]);
 ---
 
@@ -37,7 +37,7 @@ const fotos = Array.from({ length: GOTAS }, (_, i) => fotosInicio[i % fotosInici
 
     // En el móvil no hay cursor que mande la velocidad, así que la lluvia cae
     // más pausada que en el ordenador
-    const velocidadNormal = () => (movil() ? 0.55 : 1);
+    const velocidadNormal = () => (movil() ? 0.28 : 1);
     let velocidad = velocidadNormal();
     let mandaElRaton = false;
 
@@ -69,7 +69,7 @@ const fotos = Array.from({ length: GOTAS }, (_, i) => fotosInicio[i % fotosInici
       const ancho = movil() ? azar(14, 22) : azar(6, 11); // % del ancho de pantalla
       gota.style.width = `${ancho}vw`;
       gota.style.left = `${azar(-2, 100 - ancho + 2)}vw`;
-      gota.style.top = '-30vh';
+      gota.style.top = '-12vh'; // empiezan justo encima del borde, no muy arriba
 
       const deriva = azar(-40, 40); // se desvía un poco al caer, como la lluvia
       const caida = gota.animate(
