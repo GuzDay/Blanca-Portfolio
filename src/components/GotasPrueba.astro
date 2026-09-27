@@ -6,7 +6,7 @@
 import Foto from './Foto.astro';
 import { fotosInicio } from '../lib/contenido';
 
-const RANURAS = 3; // cuántas fotos pueden verse a la vez
+const RANURAS = 5; // cuántas fotos pueden verse a la vez
 const fotos = fotosInicio;
 ---
 
@@ -98,10 +98,10 @@ const fotos = fotosInicio;
 
       requestAnimationFrame(() => {
         foto.classList.add('se-ve');
-        ondular(filtro, 1300);
+        ondular(filtro, 800);
       });
 
-      const quedarse = azar(2200, 3400);
+      const quedarse = azar(900, 1500);
       setTimeout(() => {
         foto.classList.remove('se-ve');
         foto.classList.add('se-va');
@@ -109,7 +109,7 @@ const fotos = fotosInicio;
           foto.classList.remove('se-va');
           foto.style.filter = '';
           filtro.libre = true;
-        }, 1100);
+        }, 700);
       }, quedarse);
     };
 
@@ -122,7 +122,7 @@ const fotos = fotosInicio;
 
     const ciclo = () => {
       soltar(siguiente());
-      setTimeout(ciclo, azar(900, 1600));
+      setTimeout(ciclo, azar(420, 780));
     };
     setTimeout(ciclo, 400);
   }
