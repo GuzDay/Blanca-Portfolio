@@ -466,7 +466,7 @@ html:has(.menu-abierto) {
    indicador de inicio en los iPhone sin botón. */
 @media (max-width: 700px) {
   .pie {
-    padding-bottom: calc(2.5rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
   }
 }
 
@@ -973,6 +973,11 @@ html:has(.visor[open]) {
 
 /* Foto pequeña y centrada, y debajo los datos de contacto */
 .contacto {
+  position: relative;
+  /* "main" ocupa el hueco entre cabecera y pie, que miden distinto, así que
+     centrar ahí deja la foto unos píxeles alta. Se corrige con la mitad de esa
+     diferencia para que la foto quede en el centro exacto de la pantalla. */
+  transform: translateY(calc((var(--alto-pie, 0px) - var(--alto-cabecera, 0px)) / 2));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1006,14 +1011,30 @@ body:has(.contacto) main {
   width: 100%;
 }
 
+/* Los datos van colgados debajo de la foto, fuera del flujo: así lo que se
+   centra en la pantalla es la foto y no el conjunto foto + datos */
 .contacto-datos {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  margin: 0;
+  margin: clamp(1.25rem, 3vw, 2rem) 0 0;
   padding: 0;
   list-style: none;
   font-size: 1rem;
+  white-space: nowrap;
+}
+
+/* En pantallas muy bajas (móvil tumbado) vuelven a su sitio, para que no se
+   salgan por debajo */
+@media (max-height: 620px) {
+  .contacto-datos {
+    position: static;
+    transform: none;
+  }
 }
 
 .contacto-datos a:hover {

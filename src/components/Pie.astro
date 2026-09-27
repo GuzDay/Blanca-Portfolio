@@ -25,3 +25,13 @@ const año = new Date().getFullYear();
     <a href={urlPrivacidad(idioma)}>{t.privacidad}</a>
   </div>
 </footer>
+
+<script>
+  // La página de contacto centra la foto en la pantalla, y para eso necesita
+  // saber cuánto ocupan la cabecera y el pie (ver --alto-pie en global.css)
+  const pie = document.querySelector<HTMLElement>('.pie');
+  if (pie) {
+    const actualizar = () => document.documentElement.style.setProperty('--alto-pie', `${pie.offsetHeight}px`);
+    new ResizeObserver(actualizar).observe(pie);
+  }
+</script>
