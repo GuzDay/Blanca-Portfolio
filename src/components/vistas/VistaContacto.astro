@@ -71,9 +71,9 @@ const t = textos[idioma];
     // Cuánto se tarda en pulsar la siguiente tecla: nunca dos iguales, y algo más
     // de tiempo donde uno dudaría (la arroba, los puntos, los espacios).
     const tecla = (letra: string) => {
-      const base = 38 + Math.random() * 55;
-      if (letra === '@') return base + 150;
-      if (letra === '.' || letra === ' ') return base + 90;
+      const base = 19 + Math.random() * 28;
+      if (letra === '@') return base + 75;
+      if (letra === '.' || letra === ' ') return base + 45;
       return base;
     };
 
@@ -90,7 +90,7 @@ const t = textos[idioma];
       });
       lista.classList.add('escrita');
 
-      await pausa(320);
+      await pausa(160);
       for (const [i, li] of lineas.entries()) {
         const destino = li.querySelector('a') ?? li;
         li.classList.add('escribiendo');
@@ -99,7 +99,7 @@ const t = textos[idioma];
           await pausa(tecla(letra));
         }
         li.classList.remove('escribiendo');
-        await pausa(260); // respiro antes de la siguiente línea
+        await pausa(130); // respiro antes de la siguiente línea
       }
     })();
   }
