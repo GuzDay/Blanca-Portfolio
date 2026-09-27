@@ -1456,11 +1456,13 @@ body:has(.inicio-espiral) .idiomas {
   height: auto;
 }
 
-/* Los datos se mezclan en modo "diferencia" con lo que tengan detrás: sobre el
-   fondo claro se leen casi negros y, cuando pasa una foto oscura, se vuelven
-   claros. Sin sombra ni resplandor: solo la mezcla. */
+/* Con la lluvia detrás, los datos van en el color de siempre y con un halo del
+   color del fondo: así se leen igual pase lo que pase por detrás.
+   (Se probó el modo "diferencia", pero dejaba el texto blanco o descolorido
+   según la foto que pasara, sobre todo en el móvil.) */
 .contacto-datos {
-  color: #fff;
-  mix-blend-mode: difference;
-  text-shadow: none;
+  color: var(--texto);
+  text-shadow:
+    0 0 14px var(--fondo),
+    0 0 6px var(--fondo);
 }
