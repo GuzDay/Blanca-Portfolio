@@ -1458,9 +1458,9 @@ body:has(.inicio-espiral) .idiomas {
 
 /* Los datos se mezclan en modo "diferencia" con lo que tengan detrás: sobre el
    fondo claro se leen casi negros y, cuando pasa una foto oscura, se vuelven
-   claros. Un resplandor muy leve los despega en los tonos intermedios. */
+   claros. Sin sombra ni resplandor: solo la mezcla. */
 .contacto-datos {
   color: #fff;
   mix-blend-mode: difference;
-  text-shadow: 0 0 6px rgba(255, 255, 255, 0.25);
+  text-shadow: none;
 }
