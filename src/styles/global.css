@@ -1024,12 +1024,30 @@ body:has(.contacto) main {
   margin: clamp(1.25rem, 3vw, 2rem) 0 0;
   padding: 0;
   list-style: none;
-  font-size: 1rem;
+  font-size: 0.9375rem;
   white-space: nowrap;
 }
 
-/* En pantallas muy bajas (móvil tumbado) vuelven a su sitio, para que no se
-   salgan por debajo */
+@media (max-width: 700px) {
+  .contacto-datos {
+    font-size: 0.875rem;
+  }
+
+  /* El contenido ocupa toda la pantalla por debajo de la cabecera, así que el
+     pie queda justo fuera: aparece al bajar, no de entrada */
+  body:has(.contacto) main {
+    min-height: calc(100svh - var(--alto-cabecera, 4rem));
+  }
+
+  /* Como el pie ya no cuenta, la foto se centra respecto a la pantalla subiendo
+     media cabecera */
+  .contacto {
+    transform: translateY(calc(var(--alto-cabecera, 0px) / -2));
+  }
+}
+
+/* En pantallas muy bajas (móvil tumbado) los datos vuelven a su sitio, para que
+   no se salgan por debajo */
 @media (max-height: 620px) {
   .contacto-datos {
     position: static;
