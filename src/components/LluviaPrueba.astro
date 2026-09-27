@@ -42,8 +42,8 @@ const fotos = Array.from({ length: GOTAS }, (_, i) => fotosInicio[i % fotosInici
       const caida = gota.animate(
         [
           { transform: 'translate3d(0, 0, 0)', opacity: 0 },
-          { opacity: 0.72, offset: 0.12 },
-          { opacity: 0.72, offset: 0.8 },
+          { opacity: 1, offset: 0.1 },
+          { opacity: 1, offset: 0.88 },
           { transform: `translate3d(${deriva}px, 145vh, 0)`, opacity: 0 },
         ],
         { duration: azar(5200, 9500), easing: 'linear' },
