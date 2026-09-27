@@ -29,9 +29,9 @@ const fotos = Array.from({ length: GOTAS }, (_, i) => fotosInicio[i % fotosInici
     const azar = (min: number, max: number) => min + Math.random() * (max - min);
     const movil = () => window.innerWidth <= 700;
 
-    // El ratón manda en la velocidad: arriba del todo caen rápido y, según baja,
-    // se van frenando. Entre un extremo y otro hay nueve veces de diferencia.
-    const RAPIDO = 2.2;
+    // El ratón manda en la velocidad: arriba del todo caen muy rápido y, según
+    // baja, se van frenando hasta quedarse casi suspendidas.
+    const RAPIDO = 4.5;
     const LENTO = 0.25;
     const cayendo = new Set<Animation>();
     let velocidad = 1;
