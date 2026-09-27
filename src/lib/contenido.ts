@@ -1,8 +1,7 @@
 // Lee la carpeta contenido/ y la convierte en datos para las páginas.
 // Para añadir proyectos NO hace falta tocar este archivo: basta con crear carpetas.
-import type { MarkdownInstance } from 'astro';
 import { parse } from 'yaml';
-import { categorias, type Categoria, type Idioma } from '../i18n/categorias';
+import { categorias, type Categoria } from '../i18n/categorias';
 import textoAjustes from '../../contenido/ajustes.yaml?raw';
 import textoInicio from '../../contenido/home.yaml?raw';
 
@@ -64,7 +63,6 @@ const videos = import.meta.glob<string>('/contenido/proyectos/*/*/*.{mp4,webm,MP
   import: 'default',
   eager: true,
 });
-const bios = import.meta.glob<MarkdownInstance<Record<string, unknown>>>('/contenido/info/bio-*.md', { eager: true });
 
 const nombreDe = (ruta: string) => ruta.slice(ruta.lastIndexOf('/') + 1);
 const sinExtension = (archivo: string) => archivo.replace(/\.[^.]+$/, '').toLowerCase();
@@ -165,4 +163,3 @@ export const fotosInicio: FotoInicio[] = ((parse(textoInicio)?.fotos ?? []) as u
 const rutaRetrato = Object.keys(imagenes).find((ruta) => ruta.startsWith('/contenido/info/retrato.'));
 export const retrato: ImageMetadata | undefined = rutaRetrato ? imagenes[rutaRetrato] : undefined;
 
-export const bioDe = (idioma: Idioma) => bios[`/contenido/info/bio-${idioma}.md`]?.Content;

@@ -175,15 +175,6 @@ if (!existsSync(rutaAjustes)) {
   }
 }
 
-for (const [idioma, nombre] of [
-  ['es', 'español'],
-  ['en', 'inglés'],
-]) {
-  if (!existsSync(join(CONTENIDO, 'info', `bio-${idioma}.md`))) {
-    avisos.push(`info/bio-${idioma}.md no existe: la bio en ${nombre} saldrá vacía.`);
-  }
-}
-
 if (pesoTotal > AVISO_TOTAL) {
   avisos.push(`Las fotos y vídeos ocupan ${mb(pesoTotal)}. La web publicada podría acercarse a 1 GB, el máximo de GitHub Pages.`);
 }
