@@ -7,22 +7,29 @@ import { urlAvisoLegal, urlPrivacidad } from '../lib/rutas';
 
 interface Props {
   idioma: Idioma;
+  soloCopyright?: boolean; // en Contacto el pie se queda solo con el copyright
 }
 
-const { idioma } = Astro.props;
+const { idioma, soloCopyright = false } = Astro.props;
 const t = textos[idioma];
 const año = new Date().getFullYear();
 ---
 
-<footer class="pie">
-  <div>
-    <ContactoOculto tipo="correo" valor={ajustes.email} />
-    <a href={`https://www.instagram.com/${ajustes.instagram}/`} target="_blank" rel="noopener">Instagram</a>
-  </div>
+<footer class:list={['pie', soloCopyright && 'pie-minimo']}>
+  {
+    !soloCopyright && (
+      <div>
+        <ContactoOculto tipo="correo" valor={ajustes.email} />
+        <a href={`https://www.instagram.com/${ajustes.instagram}/`} target="_blank" rel="noopener">
+          Instagram
+        </a>
+      </div>
+    )
+  }
   <div>
     <span>© {año} {ajustes.nombre}</span>
-    <a href={urlAvisoLegal(idioma)}>{t.avisoLegal}</a>
-    <a href={urlPrivacidad(idioma)}>{t.privacidad}</a>
+    {!soloCopyright && <a href={urlAvisoLegal(idioma)}>{t.avisoLegal}</a>}
+    {!soloCopyright && <a href={urlPrivacidad(idioma)}>{t.privacidad}</a>}
   </div>
 </footer>
 

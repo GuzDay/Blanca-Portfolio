@@ -47,3 +47,60 @@ const t = textos[idioma];
     </ul>
   </div>
 </Base>
+
+<script>
+  // Los datos se escriben letra a letra, como si alguien los tecleara.
+  // El correo y el teléfono los monta antes ContactoOculto (los guarda cifrados
+  // para el spam), así que primero se espera a que estén puestos.
+  const lista = document.querySelector<HTMLElement>('.contacto-datos');
+  const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (lista && !quieto) {
+    const lineas = [...lista.querySelectorAll<HTMLElement>('li')];
+    const pausa = (ms: number) => new Promise((sigue) => setTimeout(sigue, ms));
+    const esperar = () =>
+      new Promise<void>((listo) => {
+        let intentos = 120; // ~2 segundos como mucho
+        const mirar = () => {
+          if (lineas.every((li) => li.querySelector('a')) || intentos-- <= 0) listo();
+          else requestAnimationFrame(mirar);
+        };
+        mirar();
+      });
+
+    // Cuánto se tarda en pulsar la siguiente tecla: nunca dos iguales, y algo más
+    // de tiempo donde uno dudaría (la arroba, los puntos, los espacios).
+    const tecla = (letra: string) => {
+      const base = 38 + Math.random() * 55;
+      if (letra === '@') return base + 150;
+      if (letra === '.' || letra === ' ') return base + 90;
+      return base;
+    };
+
+    (async () => {
+      await esperar();
+      const textos = lineas.map((li) => (li.querySelector('a') ?? li).textContent ?? '');
+
+      // Se guarda el sitio que ocupa cada línea para que no baile al escribirse
+      lineas.forEach((li, i) => {
+        const destino = li.querySelector('a') ?? li;
+        li.style.width = `${destino.getBoundingClientRect().width}px`;
+        destino.setAttribute('aria-label', textos[i]);
+        destino.textContent = '';
+      });
+      lista.classList.add('escrita');
+
+      await pausa(320);
+      for (const [i, li] of lineas.entries()) {
+        const destino = li.querySelector('a') ?? li;
+        li.classList.add('escribiendo');
+        for (const letra of textos[i]) {
+          destino.textContent += letra;
+          await pausa(tecla(letra));
+        }
+        li.classList.remove('escribiendo');
+        await pausa(260); // respiro antes de la siguiente línea
+      }
+    })();
+  }
+</script>

@@ -1046,6 +1046,43 @@ body:has(.contacto) main {
   }
 }
 
+/* En Contacto el pie es solo el copyright: va centrado y más pegado abajo */
+.pie-minimo {
+  justify-content: center;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+@media (max-width: 700px) {
+  .pie-minimo {
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Mientras se escriben, las letras se anclan a la izquierda de su hueco (si no,
+   el texto se recolocaría con cada letra) y un cursor fino marca dónde va */
+.contacto-datos.escrita li {
+  align-self: center; /* cada línea ocupa su ancho y queda centrada como bloque */
+  text-align: left;
+}
+
+.contacto-datos li.escribiendo::after {
+  content: '';
+  display: inline-block;
+  width: 1px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -0.12em;
+  background: currentColor;
+  animation: cursor-parpadeo 1s steps(1) infinite;
+}
+
+@keyframes cursor-parpadeo {
+  50% {
+    opacity: 0;
+  }
+}
+
 /* En pantallas muy bajas (móvil tumbado) los datos vuelven a su sitio, para que
    no se salgan por debajo */
 @media (max-height: 620px) {
