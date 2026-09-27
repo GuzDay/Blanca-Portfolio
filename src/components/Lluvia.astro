@@ -29,8 +29,8 @@ const fotos = Array.from({ length: GOTAS }, (_, i) => fotosInicio[i % fotosInici
     const azar = (min: number, max: number) => min + Math.random() * (max - min);
     const movil = () => window.innerWidth <= 700;
 
-    // El ratón manda en la velocidad: arriba del todo caen muy rápido y, según
-    // baja, se van frenando hasta quedarse casi suspendidas.
+    // El ratón manda en la velocidad: abajo del todo caen muy rápido y, según
+    // sube, se van frenando hasta quedarse casi suspendidas.
     const RAPIDO = 4.5;
     const LENTO = 0.07;
     const cayendo = new Set<Animation>();
@@ -38,9 +38,10 @@ const fotos = Array.from({ length: GOTAS }, (_, i) => fotosInicio[i % fotosInici
 
     const marcarVelocidad = (y: number) => {
       const altura = Math.max(1, window.innerHeight);
-      const posicion = Math.min(1, Math.max(0, y / altura));
-      // Escala suave (cada tramo frena en la misma proporción), no a saltos
-      velocidad = RAPIDO * Math.pow(LENTO / RAPIDO, posicion);
+      // Se mide desde abajo: 1 abajo del todo (rápido), 0 arriba (lento)
+      const desdeAbajo = Math.min(1, Math.max(0, y / altura));
+      // Escala suave (cada tramo acelera en la misma proporción), no a saltos
+      velocidad = LENTO * Math.pow(RAPIDO / LENTO, desdeAbajo);
       for (const animacion of cayendo) animacion.playbackRate = velocidad;
     };
 
