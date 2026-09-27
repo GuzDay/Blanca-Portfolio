@@ -1,0 +1,61 @@
+---
+// PRUEBA: fotos pequeñas cayendo de arriba abajo, como lluvia.
+// Cada una cae a su ritmo, con un poco de deriva lateral, y se desvanece al
+// entrar y al salir. Van por detrás del contenido de la página.
+import Foto from './Foto.astro';
+import { fotosInicio } from '../lib/contenido';
+
+const GOTAS = 16; // cuántas fotos hay en el aire como mucho
+const fotos = Array.from({ length: GOTAS }, (_, i) => fotosInicio[i % fotosInicio.length]);
+---
+
+<div class="lluvia" aria-hidden="true">
+  {
+    fotos.map((foto) => (
+      <figure class="lluvia-foto">
+        <Foto imagen={foto.imagen} alt="" sizes="(max-width: 700px) 22vw, 10vw" />
+      </figure>
+    ))
+  }
+</div>
+
+<script>
+  const cielo = document.querySelector<HTMLElement>('.lluvia');
+  const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (cielo && !quieto) {
+    const gotas = [...cielo.querySelectorAll<HTMLElement>('.lluvia-foto')];
+    const libres = [...gotas];
+    const azar = (min: number, max: number) => min + Math.random() * (max - min);
+    const movil = () => window.innerWidth <= 700;
+
+    const caer = () => {
+      const gota = libres.pop();
+      if (!gota) return;
+
+      const ancho = movil() ? azar(14, 22) : azar(6, 11); // % del ancho de pantalla
+      gota.style.width = `${ancho}vw`;
+      gota.style.left = `${azar(-2, 100 - ancho + 2)}vw`;
+      gota.style.top = '-30vh';
+
+      const deriva = azar(-40, 40); // se desvía un poco al caer, como la lluvia
+      const caida = gota.animate(
+        [
+          { transform: 'translate3d(0, 0, 0)', opacity: 0 },
+          { opacity: 0.72, offset: 0.12 },
+          { opacity: 0.72, offset: 0.8 },
+          { transform: `translate3d(${deriva}px, 145vh, 0)`, opacity: 0 },
+        ],
+        { duration: azar(5200, 9500), easing: 'linear' },
+      );
+
+      caida.onfinish = () => libres.push(gota);
+    };
+
+    const ciclo = () => {
+      caer();
+      setTimeout(ciclo, azar(280, 620));
+    };
+    setTimeout(ciclo, 300);
+  }
+</script>

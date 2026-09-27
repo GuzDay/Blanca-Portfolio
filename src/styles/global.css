@@ -1433,10 +1433,10 @@ body:has(.inicio-espiral) .idiomas {
   }
 }
 
-/* ---------- PRUEBA: fotos con efecto de gota de agua (página /pruebas/gotas) ----------
-   Si no se usa, se puede borrar este bloque entero junto con GotasPrueba.astro */
+/* ---------- PRUEBA: fotos cayendo como lluvia (página /pruebas/lluvia) ----------
+   Si no se usa, se puede borrar este bloque junto con LluviaPrueba.astro */
 
-.gotas {
+.lluvia {
   position: fixed;
   inset: 0;
   z-index: 0;
@@ -1444,39 +1444,21 @@ body:has(.inicio-espiral) .idiomas {
   pointer-events: none;
 }
 
-.gotas-filtros {
-  position: absolute;
-  width: 0;
-  height: 0;
-}
-
-.gota {
+.lluvia-foto {
   position: absolute;
   opacity: 0;
-  /* Se abre en círculo desde el centro, como la onda de una gota */
-  clip-path: circle(0% at 50% 50%);
-  transform: scale(0.96);
-  transition:
-    opacity 0.5s ease,
-    clip-path 0.75s cubic-bezier(0.22, 0.61, 0.36, 1),
-    transform 0.75s cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: transform, opacity;
 }
 
-.gota.se-ve {
-  opacity: 1;
-  clip-path: circle(75% at 50% 50%);
-  transform: scale(1);
-}
-
-.gota.se-va {
-  opacity: 0;
-  transform: scale(1.04);
-  transition:
-    opacity 0.6s ease,
-    transform 0.6s ease;
-}
-
-.gota img {
+.lluvia-foto img {
   width: 100%;
   height: auto;
+}
+
+/* Con la lluvia detrás, los datos llevan un halo del color del fondo para que se
+   lean aunque pase una foto por detrás */
+body:has(.lluvia) .contacto-datos {
+  text-shadow:
+    0 0 14px var(--fondo),
+    0 0 6px var(--fondo);
 }
