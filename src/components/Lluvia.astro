@@ -45,9 +45,26 @@ const fotos = Array.from({ length: GOTAS }, (_, i) => fotosInicio[i % fotosInici
       for (const animacion of cayendo) animacion.playbackRate = velocidad;
     };
 
+    // Al llegar a la página el cursor suele estar arriba, sobre el menú. Si eso
+    // contara, la lluvia entraría congelada y parecería que no pasa nada: el
+    // ratón no manda hasta que se mueve un poco de donde estaba al llegar.
+    const MOVIMIENTO_MINIMO = 45; // píxeles
+    let partida: { x: number; y: number } | null = null;
+    let mandaElRaton = false;
     let pendiente = false;
+
     document.addEventListener('pointermove', (evento) => {
-      if (evento.pointerType === 'touch' || pendiente) return;
+      if (evento.pointerType === 'touch') return;
+      if (!partida) {
+        partida = { x: evento.clientX, y: evento.clientY };
+        return;
+      }
+      if (!mandaElRaton) {
+        const recorrido = Math.hypot(evento.clientX - partida.x, evento.clientY - partida.y);
+        if (recorrido < MOVIMIENTO_MINIMO) return;
+        mandaElRaton = true;
+      }
+      if (pendiente) return;
       pendiente = true;
       requestAnimationFrame(() => {
         pendiente = false;
@@ -55,7 +72,15 @@ const fotos = Array.from({ length: GOTAS }, (_, i) => fotosInicio[i % fotosInici
       });
     });
 
-    const caer = () => {
+    // Si el cursor se va de la ventana, la lluvia vuelve a su ritmo normal
+    document.addEventListener('pointerleave', () => {
+      partida = null;
+      mandaElRaton = false;
+      velocidad = 1;
+      for (const animacion of cayendo) animacion.playbackRate = 1;
+    });
+
+    const caer = (avance = 0) => {
       const gota = libres.pop();
       if (!gota) return;
 
@@ -75,6 +100,8 @@ const fotos = Array.from({ length: GOTAS }, (_, i) => fotosInicio[i % fotosInici
         { duration: azar(5200, 9500), easing: 'linear' },
       );
 
+      // "avance" sirve para arrancar la página con fotos ya a media caída
+      if (avance > 0) caida.currentTime = (caida.effect?.getTiming().duration as number) * avance;
       caida.playbackRate = velocidad;
       cayendo.add(caida);
       caida.onfinish = () => {
@@ -82,6 +109,9 @@ const fotos = Array.from({ length: GOTAS }, (_, i) => fotosInicio[i % fotosInici
         libres.push(gota);
       };
     };
+
+    // Al abrir la página ya hay lluvia repartida por la pantalla
+    for (let i = 0; i < 8; i++) caer(azar(0.08, 0.78));
 
     const ciclo = () => {
       caer();
