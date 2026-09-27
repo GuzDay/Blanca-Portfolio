@@ -1233,11 +1233,14 @@ body:has(.inicio-espiral) .idiomas {
   --zoom: 1.08;
 }
 
-/* Al señalar una foto, se apagan todas menos ella */
+/* A prueba (sept. 2026): al señalar una foto ya NO se apagan las demás; solo se
+   acerca la señalada. Para recuperar el apagado, basta con descomentar esto. */
+/*
 .inicio-espiral:has(.espiral-pieza a:hover) .espiral-pieza:not(:hover),
 .inicio-espiral:has(.espiral-pieza a:focus-visible) .espiral-pieza:not(:focus-within) {
   opacity: 0.55;
 }
+*/
 
 /* El nombre de la categoría de la foto señalada. Va suelto, fuera del grupo que
    gira, y se coloca desde JavaScript debajo de la foto. "difference" invierte el
