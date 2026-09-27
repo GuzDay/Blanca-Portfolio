@@ -1233,6 +1233,16 @@ body:has(.inicio-espiral) .idiomas {
   --zoom: 1.08;
 }
 
+/* ...y se oscurece un poco, para que el nombre de la categoría se lea encima */
+.espiral-pieza img {
+  transition: filter 0.45s ease;
+}
+
+.espiral-pieza:hover img,
+.espiral-pieza:focus-within img {
+  filter: brightness(0.72);
+}
+
 /* A prueba (sept. 2026): al señalar una foto ya NO se apagan las demás; solo se
    acerca la señalada. Para recuperar el apagado, basta con descomentar esto. */
 /*
@@ -1251,14 +1261,20 @@ body:has(.inicio-espiral) .idiomas {
   left: 0;
   top: 0;
   z-index: 3; /* por encima de las fotos, que están en z-index 2 */
+  /* JavaScript pone el punto (left/top) en el centro de la foto señalada; esto
+     centra el texto sobre ese punto */
+  transform: translate(-50%, -50%);
   margin: 0;
-  font-size: 0.75rem;
-  letter-spacing: 0.02em;
+  /* Encima de la foto el texto necesita más presencia que fuera: algo más grande,
+     en mayúsculas y con espaciado */
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
   white-space: nowrap;
-  /* El color lo decide JavaScript midiendo el brillo de lo que queda detrás:
-     blanco sobre lo oscuro, casi negro sobre lo claro. La mezcla "difference"
-     no sirve aquí porque se anula justo sobre los grises medios. */
-  color: #111;
+  /* Va siempre en blanco: la foto señalada se oscurece un poco (ver más abajo),
+     así que se lee igual sobre cualquiera. La sombra lo despega del fondo. */
+  color: #fff;
+  text-shadow: 0 0 14px rgba(0, 0, 0, 0.55);
   opacity: 0;
   transition:
     opacity 0.3s ease,
