@@ -976,13 +976,30 @@ html:has(.visor[open]) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(1.5rem, 4vw, 2.5rem);
-  margin: clamp(1rem, 6vh, 4rem) auto 0;
+  gap: clamp(1.25rem, 3vw, 2rem);
+  margin: 0 auto;
   text-align: center;
 }
 
+/* En esta página el contenido va centrado también en vertical: "main" ocupa
+   todo el alto libre entre la cabecera y el pie, y centra lo que hay dentro */
+body:has(.contacto) main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* El relleno de "main" es mayor por abajo que por arriba; aquí se iguala para
+     que el bloque quede a la misma distancia de la cabecera que del pie */
+  padding-block: 1.5rem;
+}
+
 .contacto-retrato {
-  width: min(100%, 320px);
+  width: min(70vw, 240px);
+}
+
+@media (max-width: 700px) {
+  .contacto-retrato {
+    width: min(45vw, 160px);
+  }
 }
 
 .contacto-retrato img {
