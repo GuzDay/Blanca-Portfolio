@@ -34,7 +34,12 @@ const fotos = Array.from({ length: GOTAS }, (_, i) => fotosInicio[i % fotosInici
     const RAPIDO = 3.2;
     const LENTO = 0.07;
     const cayendo = new Set<Animation>();
-    let velocidad = 1;
+
+    // En el móvil no hay cursor que mande la velocidad, así que la lluvia cae
+    // más pausada que en el ordenador
+    const velocidadNormal = () => (movil() ? 0.55 : 1);
+    let velocidad = velocidadNormal();
+    let mandaElRaton = false;
 
     const marcarVelocidad = (y: number) => {
       const altura = Math.max(1, window.innerHeight);
@@ -47,7 +52,9 @@ const fotos = Array.from({ length: GOTAS }, (_, i) => fotosInicio[i % fotosInici
 
     let pendiente = false;
     document.addEventListener('pointermove', (evento) => {
-      if (evento.pointerType === 'touch' || pendiente) return;
+      if (evento.pointerType === 'touch') return;
+      mandaElRaton = true;
+      if (pendiente) return;
       pendiente = true;
       requestAnimationFrame(() => {
         pendiente = false;
@@ -83,13 +90,24 @@ const fotos = Array.from({ length: GOTAS }, (_, i) => fotosInicio[i % fotosInici
       };
     };
 
+    // Al cambiar el tamaño de la ventana (o girar el móvil) se recalcula, salvo
+    // que el ratón ya esté llevando la velocidad
+    window.addEventListener('resize', () => {
+      if (mandaElRaton) return;
+      velocidad = velocidadNormal();
+      for (const animacion of cayendo) animacion.playbackRate = velocidad;
+    });
+
     const ciclo = () => {
       caer();
       // Con la lluvia lenta caen menos fotos, y con la rápida más: así la
       // pantalla no se queda vacía ni se atasca
       // El ritmo acompaña a la velocidad, pero con un tope: aunque la lluvia vaya
       // lentísima, siguen apareciendo fotos y la pantalla no se queda vacía
-      setTimeout(ciclo, azar(280, 620) / Math.max(velocidad, 0.45));
+      // El ritmo acompaña a lo rápida que vaya la lluvia respecto a su ritmo
+      // normal (que en el móvil ya es más lento), con un tope para que aunque
+      // vaya lentísima sigan apareciendo fotos
+      setTimeout(ciclo, azar(280, 620) / Math.max(velocidad / velocidadNormal(), 0.45));
     };
     setTimeout(ciclo, 300);
   }
