@@ -42,13 +42,14 @@ const elementos = await Promise.all(
   if (cielo && !quieto) {
     const gotas = [...cielo.querySelectorAll<HTMLElement>('.lluvia-foto')];
     const libres = [...gotas];
-
-    // Los vídeos pesan: solo unos pocos se reproducen a la vez; el resto cae
-    // enseñando su portada, que ya está descargada
-    const MAX_VIDEOS = 3;
-    let reproduciendo = 0;
     const azar = (min: number, max: number) => min + Math.random() * (max - min);
     const movil = () => window.innerWidth <= 700;
+    const esVideo = (gota: HTMLElement) => !!gota.querySelector('video');
+
+    // Los vídeos pesan, así que solo unos pocos corren a la vez. Y ninguno cae
+    // si no va a reproducirse: un vídeo parado se ve como una foto congelada.
+    const maxVideos = () => (movil() ? 3 : 4);
+    let reproduciendo = 0;
 
     // El ratón manda en la velocidad: abajo del todo caen muy rápido y, según
     // sube, se van frenando hasta quedarse casi suspendidas.
@@ -83,10 +84,17 @@ const elementos = await Promise.all(
       });
     });
 
-    const caer = () => {
-      const gota = libres.pop();
-      if (!gota) return;
+    // Coge el siguiente elemento libre. Si ya hay bastantes vídeos en marcha,
+    // solo acepta fotos.
+    const siguienteLibre = () => {
+      const cabeOtroVideo = reproduciendo < maxVideos();
+      for (let i = libres.length - 1; i >= 0; i--) {
+        if (cabeOtroVideo || !esVideo(libres[i])) return libres.splice(i, 1)[0];
+      }
+      return null;
+    };
 
+    const lanzar = (gota: HTMLElement, alTerminar: () => void) => {
       const ancho = movil() ? azar(14, 22) : azar(6, 11); // % del ancho de pantalla
       gota.style.width = `${ancho}vw`;
       gota.style.left = `${azar(-2, 100 - ancho + 2)}vw`;
@@ -105,28 +113,53 @@ const elementos = await Promise.all(
 
       caida.playbackRate = velocidad;
       cayendo.add(caida);
-
-      const video = gota.querySelector('video');
-      let sonando = false;
-      if (video && reproduciendo < MAX_VIDEOS) {
-        sonando = true;
-        reproduciendo++;
-        video.currentTime = 0;
-        video.play().catch(() => {
-          // Si el navegador no deja arrancarlo, se queda la portada
-          sonando = false;
-          reproduciendo--;
-        });
-      }
-
       caida.onfinish = () => {
         cayendo.delete(caida);
-        if (video && sonando) {
-          video.pause();
-          reproduciendo--;
-        }
+        alTerminar();
+      };
+    };
+
+    const caer = () => {
+      const gota = siguienteLibre();
+      if (!gota) return;
+
+      const video = gota.querySelector('video');
+      if (!video) {
+        lanzar(gota, () => libres.push(gota));
+        return;
+      }
+
+      // Con un vídeo se espera a que esté rodando de verdad; hasta entonces no
+      // cae, para que nunca se vea un vídeo quieto.
+      reproduciendo++;
+      let resuelto = false;
+
+      const devolver = () => {
+        if (resuelto) return;
+        resuelto = true;
+        video.pause();
+        reproduciendo--;
         libres.push(gota);
       };
+
+      const arrancar = () => {
+        if (resuelto) return;
+        resuelto = true;
+        window.clearTimeout(espera);
+        lanzar(gota, () => {
+          video.pause();
+          reproduciendo--;
+          libres.push(gota);
+        });
+      };
+
+      const espera = window.setTimeout(devolver, 2500); // si tarda, otra vez será
+      video.addEventListener('playing', arrancar, { once: true });
+      video.currentTime = 0;
+      video.play().catch(() => {
+        window.clearTimeout(espera);
+        devolver();
+      });
     };
 
     // Al cambiar el tamaño de la ventana (o girar el móvil) se recalcula, salvo
@@ -137,15 +170,11 @@ const elementos = await Promise.all(
       for (const animacion of cayendo) animacion.playbackRate = velocidad;
     });
 
+    // El ritmo de aparición acompaña a lo rápida que vaya la lluvia respecto a
+    // su ritmo normal (en el móvil ya es más lento), con un tope para que
+    // aunque vaya lentísima la pantalla no se quede vacía
     const ciclo = () => {
       caer();
-      // Con la lluvia lenta caen menos fotos, y con la rápida más: así la
-      // pantalla no se queda vacía ni se atasca
-      // El ritmo acompaña a la velocidad, pero con un tope: aunque la lluvia vaya
-      // lentísima, siguen apareciendo fotos y la pantalla no se queda vacía
-      // El ritmo acompaña a lo rápida que vaya la lluvia respecto a su ritmo
-      // normal (que en el móvil ya es más lento), con un tope para que aunque
-      // vaya lentísima sigan apareciendo fotos
       setTimeout(ciclo, azar(280, 620) / Math.max(velocidad / velocidadNormal(), 0.45));
     };
     setTimeout(ciclo, 300);
