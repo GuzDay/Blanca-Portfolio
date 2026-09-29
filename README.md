@@ -31,6 +31,8 @@ contenido/                    ← LO QUE SE TOCA PARA AÑADIR O CAMBIAR CONTENID
 │  │     ├─ 03.mp4            ← vídeo
 │  │     └─ 03.jpg            ← portada del vídeo (mismo nombre que el vídeo)
 │  ├─ interiorismo/  eventos/  foto-fija/  musica/  viajes/
+├─ contacto/                  ← fotos y vídeos que caen en la página de contacto
+│                               (cada vídeo lleva su portada: 12.mp4 → 12.jpg)
 ├─ home.yaml                  ← fotos de la página de inicio
 ├─ ajustes.yaml               ← nombre, email, Instagram y datos legales
 └─ info/

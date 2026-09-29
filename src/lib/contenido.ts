@@ -58,6 +58,11 @@ const imagenes = import.meta.glob<ImageMetadata>('/contenido/**/*.{jpg,jpeg,png,
   import: 'default',
   eager: true,
 });
+const videosContacto = import.meta.glob<string>('/contenido/contacto/*.{mp4,webm,MP4,WEBM}', {
+  query: '?url',
+  import: 'default',
+  eager: true,
+});
 const videos = import.meta.glob<string>('/contenido/proyectos/*/*/*.{mp4,webm,MP4,WEBM}', {
   query: '?url',
   import: 'default',
@@ -163,3 +168,43 @@ export const fotosInicio: FotoInicio[] = ((parse(textoInicio)?.fotos ?? []) as u
 const rutaRetrato = Object.keys(imagenes).find((ruta) => ruta.startsWith('/contenido/info/retrato.'));
 export const retrato: ImageMetadata | undefined = rutaRetrato ? imagenes[rutaRetrato] : undefined;
 
+// Material de la lluvia de la página de Contacto: las fotos y los vídeos que hay
+// en contenido/contacto. Cada vídeo lleva su portada, que es la foto con el
+// mismo nombre (12.mp4 → 12.jpg).
+export interface ElementoLluvia {
+  tipo: 'foto' | 'video';
+  imagen: ImageMetadata; // la foto, o la portada del vídeo
+  src?: string; // solo los vídeos
+  vertical: boolean;
+}
+
+export const lluviaContacto: ElementoLluvia[] = (() => {
+  const carpeta = '/contenido/contacto/';
+  const rutasVideo = Object.keys(videosContacto);
+  const basesVideo = new Set(rutasVideo.map((ruta) => sinExtension(nombreDe(ruta))));
+  const elementos: (ElementoLluvia & { orden: string })[] = [];
+
+  for (const ruta of Object.keys(imagenes).filter((r) => r.startsWith(carpeta))) {
+    const base = sinExtension(nombreDe(ruta));
+    if (basesVideo.has(base)) continue; // es la portada de un vídeo
+    const imagen = imagenes[ruta];
+    elementos.push({ tipo: 'foto', imagen, vertical: imagen.height > imagen.width, orden: base });
+  }
+
+  for (const ruta of rutasVideo) {
+    const base = sinExtension(nombreDe(ruta));
+    const portada = imagenes[`${carpeta}${base}.jpg`];
+    if (!portada) continue; // sin portada no se puede colocar
+    elementos.push({
+      tipo: 'video',
+      imagen: portada,
+      src: videosContacto[ruta],
+      vertical: portada.height > portada.width,
+      orden: base,
+    });
+  }
+
+  return elementos
+    .sort((a, b) => ordenNatural(a.orden, b.orden))
+    .map(({ orden, ...resto }) => resto);
+})();

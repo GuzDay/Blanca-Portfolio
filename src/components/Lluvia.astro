@@ -1,21 +1,37 @@
 ---
-// Fotos pequeñas cayendo de arriba abajo, como lluvia, en la página de Contacto.
-// Cada una cae a su ritmo, con un poco de deriva lateral, y se desvanece al
-// entrar y al salir. Van por detrás del contenido de la página.
+// Fotos y vídeos pequeños cayendo de arriba abajo, como lluvia, en la página de
+// Contacto. Cada uno cae a su ritmo, con algo de deriva lateral, y se desvanece
+// al entrar y al salir. Van por detrás del contenido de la página.
+// El material está en contenido/contacto (ver lluviaContacto).
+import { getImage } from 'astro:assets';
 import Foto from './Foto.astro';
-import { fotosInicio } from '../lib/contenido';
+import { lluviaContacto } from '../lib/contenido';
 
-const GOTAS = 24; // cuántas fotos hay en el aire como mucho
-const fotos = Array.from({ length: GOTAS }, (_, i) => fotosInicio[i % fotosInicio.length]);
+const elementos = await Promise.all(
+  lluviaContacto.map(async (elemento) => ({
+    ...elemento,
+    // Los vídeos no se descargan hasta que les toca caer: solo se ve su portada
+    portada:
+      elemento.tipo === 'video'
+        ? (await getImage({ src: elemento.imagen, width: 640, format: 'webp' })).src
+        : undefined,
+  })),
+);
 ---
 
 <div class="lluvia" aria-hidden="true">
   {
-    fotos.map((foto) => (
-      <figure class="lluvia-foto">
-        <Foto imagen={foto.imagen} alt="" sizes="(max-width: 700px) 22vw, 10vw" />
-      </figure>
-    ))
+    elementos.map((elemento) =>
+      elemento.tipo === 'video' ? (
+        <figure class="lluvia-foto" data-video>
+          <video src={elemento.src} poster={elemento.portada} preload="none" muted loop playsinline />
+        </figure>
+      ) : (
+        <figure class="lluvia-foto">
+          <Foto imagen={elemento.imagen} alt="" sizes="(max-width: 700px) 22vw, 10vw" />
+        </figure>
+      ),
+    )
   }
 </div>
 
@@ -26,6 +42,11 @@ const fotos = Array.from({ length: GOTAS }, (_, i) => fotosInicio[i % fotosInici
   if (cielo && !quieto) {
     const gotas = [...cielo.querySelectorAll<HTMLElement>('.lluvia-foto')];
     const libres = [...gotas];
+
+    // Los vídeos pesan: solo unos pocos se reproducen a la vez; el resto cae
+    // enseñando su portada, que ya está descargada
+    const MAX_VIDEOS = 3;
+    let reproduciendo = 0;
     const azar = (min: number, max: number) => min + Math.random() * (max - min);
     const movil = () => window.innerWidth <= 700;
 
@@ -84,8 +105,26 @@ const fotos = Array.from({ length: GOTAS }, (_, i) => fotosInicio[i % fotosInici
 
       caida.playbackRate = velocidad;
       cayendo.add(caida);
+
+      const video = gota.querySelector('video');
+      let sonando = false;
+      if (video && reproduciendo < MAX_VIDEOS) {
+        sonando = true;
+        reproduciendo++;
+        video.currentTime = 0;
+        video.play().catch(() => {
+          // Si el navegador no deja arrancarlo, se queda la portada
+          sonando = false;
+          reproduciendo--;
+        });
+      }
+
       caida.onfinish = () => {
         cayendo.delete(caida);
+        if (video && sonando) {
+          video.pause();
+          reproduciendo--;
+        }
         libres.push(gota);
       };
     };

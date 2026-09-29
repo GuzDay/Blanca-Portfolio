@@ -1453,7 +1453,9 @@ body:has(.inicio-espiral) .idiomas {
   will-change: transform, opacity;
 }
 
-.lluvia-foto img {
+.lluvia-foto img,
+.lluvia-foto video {
+  display: block;
   width: 100%;
   height: auto;
 }
