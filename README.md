@@ -92,7 +92,7 @@ código. Ahí puede:
 | Cambiar el título de un proyecto | Renombrar su carpeta: ese nombre sale en la web |
 | Mover un proyecto de categoría | Arrastrar su carpeta a otra categoría |
 | Cambiar lo que cae en Contacto | La carpeta `Contacto`, archivos `Contacto - Animación 35`, 36… |
-| Cambiar el retrato de Contacto | Sustituir `Contacto 1.JPG` |
+| Cambiar el retrato de Contacto | Sustituir `00 Foto de Contacto.JPG` (la única foto de la carpeta `Contacto` que no se llama «Animación») |
 
 Después, **doble clic en `Actualizar web.command`** (en la carpeta del proyecto). Eso:
 

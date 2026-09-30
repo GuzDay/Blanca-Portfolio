@@ -224,24 +224,30 @@ async function pasarContacto() {
   const destino = join(CONTENIDO, 'contacto');
   mkdirSync(destino, { recursive: true });
 
+  const archivos = listar(base).sort(ordenNatural);
+
+  // El retrato de la pagina de contacto es la unica foto suelta de la carpeta:
+  // la que no se llama "Contacto - Animacion N". Si hubiera varias, manda la primera.
+  const esLluvia = (archivo) => sinTildes(archivo).includes('Anima');
+  const fuenteRetrato = archivos.find(
+    (archivo) => FOTOS.has(extname(archivo).toLowerCase()) && !esLluvia(archivo),
+  );
+  if (fuenteRetrato) {
+    const retrato = join(CONTENIDO, 'info', 'retrato.jpg');
+    if (alDia(join(base, fuenteRetrato), retrato)) cuenta.saltados++;
+    else {
+      await optimizarFoto(join(base, fuenteRetrato), retrato, 1600);
+      console.log('   info/retrato.jpg');
+    }
+  }
+
   const quedan = new Set();
-  for (const archivo of listar(base).sort(ordenNatural)) {
+  for (const archivo of archivos) {
     const fuente = join(base, archivo);
     if (!statSync(fuente).isFile()) continue;
+    if (!esLluvia(archivo)) continue;
     const extension = extname(archivo).toLowerCase();
     const numero = archivo.match(/([0-9]+)\.[^.]+$/)?.[1];
-
-    // "Contacto 1.JPG" y "Contacto 2.JPG" son el retrato, no la lluvia
-    if (!sinTildes(archivo).includes('Anima')) {
-      if (FOTOS.has(extension) && numero === '1') {
-        const retrato = join(CONTENIDO, 'info', 'retrato.jpg');
-        if (!alDia(fuente, retrato)) {
-          await optimizarFoto(fuente, retrato, 1600);
-          console.log('   info/retrato.jpg');
-        } else cuenta.saltados++;
-      }
-      continue;
-    }
 
     const n = String(Number(numero)).padStart(2, '0');
     if (FOTOS.has(extension)) {
