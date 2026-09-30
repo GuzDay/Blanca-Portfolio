@@ -7,6 +7,10 @@ import { getImage } from 'astro:assets';
 import Foto from './Foto.astro';
 import { lluviaContacto } from '../lib/contenido';
 
+// Piezas que caen más pequeñas que el resto, para que pasen desapercibidas.
+// Es el número del archivo en contenido/contacto.
+const DISIMULADAS = new Set(['05']);
+
 const elementos = await Promise.all(
   lluviaContacto.map(async (elemento) => ({
     ...elemento,
@@ -23,11 +27,11 @@ const elementos = await Promise.all(
   {
     elementos.map((elemento) =>
       elemento.tipo === 'video' ? (
-        <figure class="lluvia-foto" data-video>
+        <figure class="lluvia-foto" data-video data-discreta={DISIMULADAS.has(elemento.nombre) || undefined}>
           <video src={elemento.src} poster={elemento.portada} preload="none" muted loop playsinline />
         </figure>
       ) : (
-        <figure class="lluvia-foto">
+        <figure class="lluvia-foto" data-discreta={DISIMULADAS.has(elemento.nombre) || undefined}>
           <Foto imagen={elemento.imagen} alt="" sizes="(max-width: 700px) 22vw, 10vw" />
         </figure>
       ),
@@ -106,7 +110,17 @@ const elementos = await Promise.all(
     const lanzar = (gota: HTMLElement, alTerminar: () => void) => {
       const carril = anchoCarril();
       const cuantos = Math.max(3, Math.floor(100 / carril));
-      const ancho = Math.min(carril - 1, movil() ? azar(23, 30) : azar(8, 11));
+      // Las discretas caen siempre en el extremo pequeño del rango, para que
+      // se noten lo justo; el resto varía de tamaño como siempre.
+      const discreta = gota.hasAttribute('data-discreta');
+      const suyo = discreta
+        ? movil()
+          ? azar(22, 24)
+          : azar(7.5, 8.5)
+        : movil()
+          ? azar(23, 30)
+          : azar(8, 11);
+      const ancho = Math.min(carril - 1, suyo);
       gota.style.width = `${ancho}vw`;
       gota.style.top = '-12vh'; // empieza justo encima del borde, no muy arriba
 

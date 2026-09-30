@@ -176,6 +176,7 @@ export interface ElementoLluvia {
   imagen: ImageMetadata; // la foto, o la portada del vídeo
   src?: string; // solo los vídeos
   vertical: boolean;
+  nombre: string; // el número del archivo ("05"), para poder señalar una pieza concreta
 }
 
 export const lluviaContacto: ElementoLluvia[] = (() => {
@@ -188,7 +189,13 @@ export const lluviaContacto: ElementoLluvia[] = (() => {
     const base = sinExtension(nombreDe(ruta));
     if (basesVideo.has(base)) continue; // es la portada de un vídeo
     const imagen = imagenes[ruta];
-    elementos.push({ tipo: 'foto', imagen, vertical: imagen.height > imagen.width, orden: base });
+    elementos.push({
+      tipo: 'foto',
+      imagen,
+      vertical: imagen.height > imagen.width,
+      nombre: base,
+      orden: base,
+    });
   }
 
   for (const ruta of rutasVideo) {
@@ -200,6 +207,7 @@ export const lluviaContacto: ElementoLluvia[] = (() => {
       imagen: portada,
       src: videosContacto[ruta],
       vertical: portada.height > portada.width,
+      nombre: base,
       orden: base,
     });
   }
