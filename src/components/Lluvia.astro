@@ -54,7 +54,7 @@ const elementos = await Promise.all(
 
     // Los vídeos pesan, así que solo unos pocos corren a la vez. Y ninguno cae
     // si no va a reproducirse: un vídeo parado se ve como una foto congelada.
-    const maxVideos = () => (movil() ? 3 : 4);
+    const maxVideos = () => (movil() ? 5 : 6);
     let reproduciendo = 0;
 
     // El ratón manda en la velocidad: abajo del todo caen muy rápido y, según
@@ -90,11 +90,12 @@ const elementos = await Promise.all(
       });
     });
 
-    // Coge el siguiente elemento libre. Si ya hay bastantes vídeos en marcha,
-    // solo acepta fotos.
+    // Coge el siguiente elemento libre por turnos: el que más tiempo lleva sin
+    // caer va primero (al terminar, cada uno vuelve al final de la cola). Si ya
+    // hay bastantes vídeos en marcha, se salta los vídeos y coge una foto.
     const siguienteLibre = () => {
       const cabeOtroVideo = reproduciendo < maxVideos();
-      for (let i = libres.length - 1; i >= 0; i--) {
+      for (let i = 0; i < libres.length; i++) {
         if (cabeOtroVideo || !esVideo(libres[i])) return libres.splice(i, 1)[0];
       }
       return null;
@@ -189,7 +190,7 @@ const elementos = await Promise.all(
         }
       };
 
-      const espera = window.setTimeout(devolver, 2500); // si tarda, otra vez será
+      const espera = window.setTimeout(devolver, 6000); // si tarda mucho, otra vez será
       video.addEventListener('playing', arrancar, { once: true });
       video.currentTime = 0;
       video.play().catch(() => {
