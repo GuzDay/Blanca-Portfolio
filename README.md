@@ -79,19 +79,48 @@ Para **quitar** un proyecto, borra su carpeta (y sus fotos de `home.yaml` si las
 
 ---
 
-## Volcar todas las fotos de golpe
+## Actualizar la web con un doble clic
 
-Cuando reorganices la carpeta de originales (`Fotos portfolio Blanquit`), puedes volcarla entera de una vez:
+Blanca trabaja **solo en la carpeta de fotos compartida**; no toca el proyecto ni el
+código. Ahí puede:
+
+| Lo que quiere hacer | Cómo |
+|---|---|
+| Añadir o quitar fotos y vídeos | Meterlos o sacarlos de la carpeta del proyecto |
+| Cambiar el orden de las fotos | Renombrarlas: manda el número (`Basyco 1`, `Basyco 2`…) |
+| Cambiar el orden de los proyectos | El número de la carpeta (`01 White&One`, `02 Basyco - Retiro`…) |
+| Cambiar el título de un proyecto | Renombrar su carpeta: ese nombre sale en la web |
+| Mover un proyecto de categoría | Arrastrar su carpeta a otra categoría |
+| Cambiar lo que cae en Contacto | La carpeta `Contacto`, archivos `Contacto - Animación 35`, 36… |
+| Cambiar el retrato de Contacto | Sustituir `Contacto 1.JPG` |
+
+Después, **doble clic en `Actualizar web.command`** (en la carpeta del proyecto). Eso:
+
+1. Optimiza las fotos nuevas a 2500 px (1400 px las de la lluvia de contacto).
+2. Comprime los vídeos nuevos: los de proyecto a 720p con sonido, los de la lluvia a
+   4 segundos sin sonido; a todos les saca su portada.
+3. Borra de la web lo que Blanca haya quitado de su carpeta.
+4. Lo sube a GitHub y lo publica.
+
+Solo trabaja con lo que ha cambiado, así que tarda segundos salvo que haya vídeos
+nuevos, que son lentos de comprimir.
+
+La ruta de la carpeta compartida está en el archivo `origen.txt`. Si cambia de sitio,
+se edita ahí. También se puede lanzar a mano:
 
 ```sh
-npm run importar -- "/ruta/a/Fotos portfolio Blanquit"
+npm run actualizar                      # usa la ruta de origen.txt
+npm run actualizar -- "/otra/ruta"      # usa otra carpeta
+npm run actualizar -- --sin-publicar    # prepara pero no sube
 ```
 
-Coge cada carpeta de categoría y de proyecto, optimiza las fotos a 2500 px y las renombra a `01.jpg`, `02.jpg`… por orden. También actualiza el retrato de Contacto.
+**Dos cosas que conviene saber:**
 
-**Ojo:** la web queda igual que esa carpeta. Lo que no esté allí se borra de la web, así que revisa luego `contenido/home.yaml` por si alguna foto de la portada ha cambiado de número. Los vídeos no se importan: avisa de cuáles se ha saltado para que los comprimas antes (máximo 50 MB).
-
-Las carpetas de origen se llaman así: `Moda/04 Basyco - Estudio/Basyco 3.jpg`. El número de delante marca el orden dentro de la categoría y el resto del nombre es el título del proyecto.
+- Los archivos sueltos en una categoría (fuera de la carpeta de un proyecto) **se
+  ignoran**. Por ejemplo, un vídeo dejado directamente en `Interiores` no entra en la
+  web: hay que meterlo en la carpeta del proyecto que toque.
+- Si cambian los números de las fotos, revisa `contenido/home.yaml`, que es donde se
+  eligen las doce de la portada.
 
 ## Ver la web en tu ordenador
 
