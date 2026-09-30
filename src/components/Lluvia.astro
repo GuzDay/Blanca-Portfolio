@@ -46,6 +46,12 @@ const elementos = await Promise.all(
     const movil = () => window.innerWidth <= 700;
     const esVideo = (gota: HTMLElement) => !!gota.querySelector('video');
 
+    // La pantalla se reparte en carriles verticales. En cada carril solo cae una
+    // foto a la vez y todas bajan al mismo ritmo, así que nunca se tapan.
+    const anchoCarril = () => (movil() ? 24 : 12); // % del ancho de pantalla
+    const ocupacion = new Map<number, HTMLElement>();
+    const DURACION = 7000; // todas tardan lo mismo: si no, unas alcanzarían a otras
+
     // Los vídeos pesan, así que solo unos pocos corren a la vez. Y ninguno cae
     // si no va a reproducirse: un vídeo parado se ve como una foto congelada.
     const maxVideos = () => (movil() ? 3 : 4);
@@ -94,29 +100,53 @@ const elementos = await Promise.all(
       return null;
     };
 
+    // Devuelve false si no hay carril libre: entonces esta foto se queda para la
+    // siguiente vuelta en vez de caer encima de otra.
     const lanzar = (gota: HTMLElement, alTerminar: () => void) => {
-      const ancho = movil() ? azar(14, 22) : azar(6, 11); // % del ancho de pantalla
+      const carril = anchoCarril();
+      const cuantos = Math.max(3, Math.floor(100 / carril));
+      const ancho = Math.min(carril - 1, movil() ? azar(14, 22) : azar(6, 11));
       gota.style.width = `${ancho}vw`;
-      gota.style.left = `${azar(-2, 100 - ancho + 2)}vw`;
-      gota.style.top = '-12vh'; // empiezan justo encima del borde, no muy arriba
+      gota.style.top = '-12vh'; // empieza justo encima del borde, no muy arriba
 
-      const deriva = azar(-40, 40); // se desvía un poco al caer, como la lluvia
+      const alto = gota.getBoundingClientRect().height || 200;
+
+      // Un carril está libre si el anterior ya ha bajado lo suficiente
+      const libre = (indice: number) => {
+        const previo = ocupacion.get(indice);
+        if (!previo) return true;
+        const caja = previo.getBoundingClientRect();
+        return !caja.height || caja.top > alto + 12;
+      };
+
+      const orden = Array.from({ length: cuantos }, (_, i) => i).sort(() => Math.random() - 0.5);
+      const elegido = orden.find(libre);
+      if (elegido === undefined) return false;
+
+      ocupacion.set(elegido, gota);
+      const sitio = elegido * (100 / cuantos);
+      const sobra = Math.max(0, 100 / cuantos - ancho);
+      gota.style.left = `${sitio + azar(0, sobra)}vw`;
+
+      // Cae recta, sin desviarse a los lados
       const caida = gota.animate(
         [
           { transform: 'translate3d(0, 0, 0)', opacity: 0 },
           { opacity: 1, offset: 0.1 },
           { opacity: 1, offset: 0.88 },
-          { transform: `translate3d(${deriva}px, 145vh, 0)`, opacity: 0 },
+          { transform: 'translate3d(0, 145vh, 0)', opacity: 0 },
         ],
-        { duration: azar(5200, 9500), easing: 'linear' },
+        { duration: DURACION, easing: 'linear' },
       );
 
       caida.playbackRate = velocidad;
       cayendo.add(caida);
       caida.onfinish = () => {
         cayendo.delete(caida);
+        if (ocupacion.get(elegido) === gota) ocupacion.delete(elegido);
         alTerminar();
       };
+      return true;
     };
 
     const caer = () => {
@@ -125,7 +155,7 @@ const elementos = await Promise.all(
 
       const video = gota.querySelector('video');
       if (!video) {
-        lanzar(gota, () => libres.push(gota));
+        if (!lanzar(gota, () => libres.push(gota))) libres.push(gota);
         return;
       }
 
@@ -146,11 +176,17 @@ const elementos = await Promise.all(
         if (resuelto) return;
         resuelto = true;
         window.clearTimeout(espera);
-        lanzar(gota, () => {
+        const cayo = lanzar(gota, () => {
           video.pause();
           reproduciendo--;
           libres.push(gota);
         });
+        if (!cayo) {
+          // Sin carril libre: se guarda para la siguiente vuelta
+          video.pause();
+          reproduciendo--;
+          libres.push(gota);
+        }
       };
 
       const espera = window.setTimeout(devolver, 2500); // si tarda, otra vez será
