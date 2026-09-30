@@ -48,7 +48,7 @@ const elementos = await Promise.all(
 
     // La pantalla se reparte en carriles verticales. En cada carril solo cae una
     // foto a la vez y todas bajan al mismo ritmo, así que nunca se tapan.
-    const anchoCarril = () => (movil() ? 24 : 12); // % del ancho de pantalla
+    const anchoCarril = () => (movil() ? 31 : 12); // % del ancho de pantalla
     const ocupacion = new Map<number, HTMLElement>();
     const DURACION = 7000; // todas tardan lo mismo: si no, unas alcanzarían a otras
 
@@ -106,7 +106,7 @@ const elementos = await Promise.all(
     const lanzar = (gota: HTMLElement, alTerminar: () => void) => {
       const carril = anchoCarril();
       const cuantos = Math.max(3, Math.floor(100 / carril));
-      const ancho = Math.min(carril - 1, movil() ? azar(14, 22) : azar(6, 11));
+      const ancho = Math.min(carril - 1, movil() ? azar(23, 30) : azar(8, 11));
       gota.style.width = `${ancho}vw`;
       gota.style.top = '-12vh'; // empieza justo encima del borde, no muy arriba
 
