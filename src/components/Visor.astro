@@ -18,11 +18,12 @@ const t = textos[Astro.props.idioma];
   <div class="visor-escenario">
     {/* Tres huecos: la foto anterior, la actual y la siguiente. El carro se
         desplaza para que siempre se vea la del medio; al arrastrar, las vecinas
-        asoman por los lados como en un carrusel. */}
+        asoman por los lados como en un carrusel. Los tres son iguales: al pasar
+        de foto no se les cambia la imagen, se cambian ellos de sitio. */}
     <div class="visor-carro">
-      <div class="visor-hueco"><img class="visor-vecina" data-lado="antes" alt="" aria-hidden="true" /></div>
-      <div class="visor-hueco"><img class="visor-imagen" alt="" /></div>
-      <div class="visor-hueco"><img class="visor-vecina" data-lado="despues" alt="" aria-hidden="true" /></div>
+      <div class="visor-hueco"><img alt="" /></div>
+      <div class="visor-hueco"><img alt="" /></div>
+      <div class="visor-hueco"><img alt="" /></div>
     </div>
     <button type="button" class="visor-anterior" aria-label={t.anterior}>
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4 7 12l8 8" /></svg>
@@ -38,7 +39,6 @@ const t = textos[Astro.props.idioma];
   const botones = [...document.querySelectorAll<HTMLButtonElement>('.abrir-visor')];
 
   if (visor && botones.length > 0) {
-    const imagen = visor.querySelector<HTMLImageElement>('.visor-imagen')!;
     const contador = visor.querySelector<HTMLElement>('.visor-contador')!;
     const escenario = visor.querySelector<HTMLElement>('.visor-escenario')!;
     let actual = 0;
@@ -55,6 +55,7 @@ const t = textos[Astro.props.idioma];
 
     const ajustarFlechas = () => {
       // Solo se puede medir con el visor abierto y la foto ya colocada en pantalla
+      const imagen = imagenActual();
       if (!pincel || !imagen.naturalWidth || !visor.open) return;
       const marco = imagen.getBoundingClientRect();
       if (!marco.width || !marco.height) return;
@@ -98,18 +99,50 @@ const t = textos[Astro.props.idioma];
     };
 
     const carro = visor.querySelector<HTMLElement>('.visor-carro')!;
-    const vecinaAntes = visor.querySelector<HTMLImageElement>('[data-lado="antes"]')!;
-    const vecinaDespues = visor.querySelector<HTMLImageElement>('[data-lado="despues"]')!;
 
-    const pintar = (destino: HTMLImageElement, indice: number, conTexto: boolean) => {
+    // Los tres huecos, en el orden en que están puestos ahora mismo. El del
+    // medio es siempre el que se ve; al pasar de foto se mueven de sitio.
+    const huecos = () => [...carro.children] as HTMLElement[];
+    const fotoDe = (hueco: HTMLElement) => hueco.querySelector('img')!;
+    const imagenActual = () => fotoDe(huecos()[1]);
+
+    const pintar = (destino: HTMLImageElement, indice: number) => {
       const origen = botones[(indice + botones.length) % botones.length].querySelector('img');
       if (!origen) return;
+      if (destino.src === origen.src) return; // ya es esa: no se toca
+      // Mientras no llegue la nueva, el navegador seguiría enseñando la anterior
+      // en ese hueco. Se tapa hasta que esté, que ver la foto equivocada
+      // despista mucho más que ver un hueco vacío un instante.
+      destino.dataset.cargando = '';
       destino.sizes = '100vw';
       destino.srcset = origen.srcset;
       destino.src = origen.src;
-      // Las vecinas no llevan texto alternativo: las anunciaría por duplicado
-      if (conTexto) destino.alt = origen.alt;
+      destino.alt = origen.alt;
+      if (destino.complete) delete destino.dataset.cargando;
     };
+
+    // Quién hace de foto central y quiénes de vecinas. Solo la central se
+    // anuncia a los lectores de pantalla: si no, diría cada foto tres veces.
+    const repartirPapeles = () => {
+      const tres = huecos();
+      for (const hueco of tres) {
+        const foto = fotoDe(hueco);
+        const esCentral = hueco === tres[1];
+        foto.classList.toggle('visor-imagen', esCentral);
+        foto.classList.toggle('visor-vecina', !esCentral);
+        if (esCentral) foto.removeAttribute('aria-hidden');
+        else foto.setAttribute('aria-hidden', 'true');
+      }
+    };
+
+    for (const hueco of huecos()) {
+      const foto = fotoDe(hueco);
+      foto.addEventListener('load', () => {
+        delete foto.dataset.cargando;
+        if (foto === imagenActual()) ajustarFlechas();
+      });
+      foto.addEventListener('error', () => delete foto.dataset.cargando);
+    }
 
     // Cuánto se corre el carro. Mientras el dedo se mueve se escribe una sola
     // vez por fotograma: escribirlo en cada evento obliga al navegador a
@@ -134,17 +167,40 @@ const t = textos[Astro.props.idioma];
       carro.style.setProperty('--arrastre', `${px}px`);
     };
 
-    const mostrar = (indice: number) => {
-      actual = (indice + botones.length) % botones.length;
+    const rematar = () => {
       carro.classList.remove('deslizando');
       colocarYa(0);
-      pintar(imagen, actual, true);
-      pintar(vecinaAntes, actual - 1, false);
-      pintar(vecinaDespues, actual + 1, false);
-      imagen.style.transition = 'none';
-      imagen.style.transform = ''; // que la nueva foto no herede la ampliación
+      repartirPapeles();
+      const central = imagenActual();
+      central.style.transition = 'none';
+      central.style.transform = ''; // que la nueva foto no herede la ampliación
       contador.textContent = `${actual + 1} / ${botones.length}`;
       requestAnimationFrame(ajustarFlechas);
+    };
+
+    // Al abrir el visor (o si algo se descoloca): se reparten las tres fotos
+    const mostrar = (indice: number) => {
+      actual = (indice + botones.length) % botones.length;
+      const [antes, medio, despues] = huecos();
+      pintar(fotoDe(antes), actual - 1);
+      pintar(fotoDe(medio), actual);
+      pintar(fotoDe(despues), actual + 1);
+      rematar();
+    };
+
+    // Pasar de foto SIN tocarle la imagen a la que se está viendo: el hueco que
+    // acaba de salir por un lado se lleva al otro extremo y recibe allí la foto
+    // nueva, fuera de la pantalla. Antes se le cambiaba la imagen al hueco
+    // central, y hasta que la nueva cargaba seguía enseñándose la anterior:
+    // ese era el parpadeo de la foto vieja al pasar fotos rápido.
+    const rotar = (direccion: number) => {
+      const [antes, , despues] = huecos();
+      if (direccion === 1) carro.appendChild(antes);
+      else carro.insertBefore(despues, antes);
+      actual = (actual + direccion + botones.length) % botones.length;
+      const extremo = huecos()[direccion === 1 ? 2 : 0];
+      pintar(fotoDe(extremo), actual + direccion);
+      rematar();
     };
 
     // Cambio de foto con la animación del carrusel: la actual se va por un lado
@@ -161,7 +217,7 @@ const t = textos[Astro.props.idioma];
       // clase en el mismo fotograma se fundiría en uno solo y no habría animación.
       const ancho = carro.getBoundingClientRect().width;
       if (!ancho) {
-        mostrar(actual + direccion);
+        rotar(direccion);
         return;
       }
       carro.classList.add('deslizando');
@@ -174,12 +230,11 @@ const t = textos[Astro.props.idioma];
         cerrarDeslizamiento = null;
         window.clearTimeout(reloj);
         carro.removeEventListener('transitionend', alTerminar);
-        mostrar(actual + direccion);
+        rotar(direccion);
       };
       carro.addEventListener('transitionend', alTerminar);
     };
 
-    imagen.addEventListener('load', ajustarFlechas);
     window.addEventListener('resize', ajustarFlechas);
 
     botones.forEach((boton, indice) =>
@@ -286,11 +341,16 @@ const t = textos[Astro.props.idioma];
     const separacion = (dedos: TouchList) =>
       Math.hypot(dedos[0].clientX - dedos[1].clientX, dedos[0].clientY - dedos[1].clientY);
 
+    let fotoPellizcada: HTMLImageElement | null = null;
+
     const soltarPellizco = () => {
       if (!pellizcoInicial) return;
       pellizcoInicial = 0;
-      imagen.style.transition = 'transform 0.25s ease';
-      imagen.style.transform = '';
+      if (fotoPellizcada) {
+        fotoPellizcada.style.transition = 'transform 0.25s ease';
+        fotoPellizcada.style.transform = '';
+      }
+      fotoPellizcada = null;
     };
 
     escenario.addEventListener(
@@ -300,11 +360,12 @@ const t = textos[Astro.props.idioma];
         soltarArrastre(); // dos dedos no son un deslizamiento para pasar de foto
         pellizcoInicial = separacion(evento.touches);
         // Se amplía por donde pellizcas, no por el centro de la foto
-        const caja = imagen.getBoundingClientRect();
+        fotoPellizcada = imagenActual();
+        const caja = fotoPellizcada.getBoundingClientRect();
         const x = (evento.touches[0].clientX + evento.touches[1].clientX) / 2;
         const y = (evento.touches[0].clientY + evento.touches[1].clientY) / 2;
-        imagen.style.transformOrigin = `${((x - caja.left) / caja.width) * 100}% ${((y - caja.top) / caja.height) * 100}%`;
-        imagen.style.transition = 'none';
+        fotoPellizcada.style.transformOrigin = `${((x - caja.left) / caja.width) * 100}% ${((y - caja.top) / caja.height) * 100}%`;
+        fotoPellizcada.style.transition = 'none';
       },
       { passive: true },
     );
@@ -312,13 +373,13 @@ const t = textos[Astro.props.idioma];
     escenario.addEventListener(
       'touchmove',
       (evento) => {
-        if (evento.touches.length !== 2 || !pellizcoInicial) return;
+        if (evento.touches.length !== 2 || !pellizcoInicial || !fotoPellizcada) return;
         evento.preventDefault(); // si no, el navegador amplía la página entera
         const escala = Math.min(
           AMPLIACION_MAXIMA,
           Math.max(1, separacion(evento.touches) / pellizcoInicial),
         );
-        imagen.style.transform = `scale(${escala})`;
+        fotoPellizcada.style.transform = `scale(${escala})`;
       },
       { passive: false },
     );
@@ -338,7 +399,7 @@ const t = textos[Astro.props.idioma];
     visor.addEventListener('click', (evento) => {
       if (huboDeslizamiento) return;
       const donde = evento.target as HTMLElement;
-      if (donde === imagen || donde.closest('button')) return;
+      if (donde === imagenActual() || donde.closest('button')) return;
       if (donde === visor || donde === escenario || donde === carro || donde.closest('.visor-hueco')) {
         visor.close();
       }

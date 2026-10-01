@@ -860,6 +860,13 @@ html:has(.visor[open]) {
   -webkit-user-drag: none;
 }
 
+/* Mientras a un hueco no le ha llegado su foto nueva, el navegador seguiría
+   enseñando la anterior. Se tapa: ver la foto equivocada confunde mucho más
+   que ver un hueco vacío un instante. */
+.visor-hueco img[data-cargando] {
+  opacity: 0;
+}
+
 .visor-anterior,
 .visor-siguiente {
   position: absolute;
