@@ -79,6 +79,37 @@ const persona = {
         true,
       );
     </script>
+    {/* Si el navegador de quien entra no está en español, se le lleva a la
+        versión inglesa de ESTA misma página. Va aquí arriba y sin esperar a
+        nada para que no llegue a verse un parpadeo en español. Solo ocurre la
+        primera vez: en cuanto alguien toca ES o EN en la cabecera, manda su
+        elección y esto no vuelve a actuar. Nunca lleva de inglés a español, así
+        que no puede entrar en bucle. */}
+    {idioma === 'es' && (
+      <script is:inline define:vars={{ enIngles: alternativas.en }}>
+        (function () {
+          try {
+            if (localStorage.getItem('idioma')) return; // ya eligió
+          } catch (e) {
+            /* sin almacenamiento se sigue, pero solo una vez por pestaña */
+          }
+          try {
+            if (sessionStorage.getItem('idioma-mirado')) return;
+            sessionStorage.setItem('idioma-mirado', '1');
+          } catch (e) {
+            /* si tampoco hay sessionStorage, se mira igual: la redirección
+               es siempre en el mismo sentido y no puede repetirse en bucle */
+          }
+          var lenguas = navigator.languages && navigator.languages.length
+            ? navigator.languages
+            : [navigator.language || ''];
+          var entiendeEspanol = lenguas.some(function (l) {
+            return String(l).toLowerCase().indexOf('es') === 0;
+          });
+          if (!entiendeEspanol) location.replace(enIngles);
+        })();
+      </script>
+    )}
     <title>{tituloCompleto}</title>
     <meta name="description" content={descripcion} />
     <link rel="canonical" href={absoluta(alternativas[idioma])} />

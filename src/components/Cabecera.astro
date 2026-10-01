@@ -50,12 +50,24 @@ const t = textos[idioma];
     </ul>
   </nav>
   <div class="idiomas" aria-label={t.idiomas}>
-    <a href={alternativas.es} lang="es" hreflang="es" aria-current={idioma === 'es' ? 'true' : undefined}>ES</a>
-    <a href={alternativas.en} lang="en" hreflang="en" aria-current={idioma === 'en' ? 'true' : undefined}>EN</a>
+    <a href={alternativas.es} lang="es" hreflang="es" data-idioma="es" aria-current={idioma === 'es' ? 'true' : undefined}>ES</a>
+    <a href={alternativas.en} lang="en" hreflang="en" data-idioma="en" aria-current={idioma === 'en' ? 'true' : undefined}>EN</a>
   </div>
 </header>
 
 <script>
+  // Elegir idioma a mano manda sobre el del navegador: se recuerda para que la
+  // detección automática no vuelva a llevarle a donde no quiere estar.
+  for (const enlace of document.querySelectorAll<HTMLAnchorElement>('.idiomas a[data-idioma]')) {
+    enlace.addEventListener('click', () => {
+      try {
+        localStorage.setItem('idioma', enlace.dataset.idioma!);
+      } catch {
+        /* en navegación privada no se puede guardar; no es grave */
+      }
+    });
+  }
+
   // Guarda la altura de la cabecera en una variable CSS (la usa la portada)
   const cabecera = document.querySelector<HTMLElement>('.cabecera');
   if (cabecera) {
