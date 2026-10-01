@@ -6,6 +6,11 @@ email: "blancagtg22@gmail.com"      # Email de contacto
 instagram: "blancagtarrio"          # Usuario de Instagram, sin @
 telefono: "+34 633 229 035"         # Opcional. Déjalo vacío ("") para que no aparezca
 
+# Mientras esté en "no", las páginas de aviso legal y privacidad no salen en el
+# pie, no entran en el mapa del sitio y se le pide a Google que no las indexe.
+# Siguen existiendo: en cuanto rellenes los datos de abajo, pon "si" y vuelven.
+legales: "no"
+
 # Datos del aviso legal (obligatorios en España para una web profesional)
 titular: "[Nombre y apellidos]"
 nif: "[NIF]"

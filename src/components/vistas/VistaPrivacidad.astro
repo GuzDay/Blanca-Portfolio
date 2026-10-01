@@ -4,7 +4,7 @@ import ContactoOculto from '../ContactoOculto.astro';
 import Base from '../../layouts/Base.astro';
 import type { Idioma } from '../../i18n/categorias';
 import { textos } from '../../i18n/textos';
-import { ajustes } from '../../lib/contenido';
+import { ajustes, legalesALaVista } from '../../lib/contenido';
 import { urlPrivacidad } from '../../lib/rutas';
 
 interface Props {
@@ -18,6 +18,7 @@ const t = textos[idioma];
 <Base
   idioma={idioma}
   alternativas={{ es: urlPrivacidad('es'), en: urlPrivacidad('en') }}
+  noIndex={!legalesALaVista}
   titulo={t.privacidad}
 >
   <div class="texto-legal">

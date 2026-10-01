@@ -2,7 +2,7 @@
 import ContactoOculto from './ContactoOculto.astro';
 import type { Idioma } from '../i18n/categorias';
 import { textos } from '../i18n/textos';
-import { ajustes } from '../lib/contenido';
+import { ajustes, legalesALaVista } from '../lib/contenido';
 import { urlAvisoLegal, urlPrivacidad } from '../lib/rutas';
 
 interface Props {
@@ -28,8 +28,8 @@ const año = new Date().getFullYear();
   }
   <div>
     <span>© {año} {ajustes.nombre}</span>
-    {!soloCopyright && <a href={urlAvisoLegal(idioma)}>{t.avisoLegal}</a>}
-    {!soloCopyright && <a href={urlPrivacidad(idioma)}>{t.privacidad}</a>}
+    {!soloCopyright && legalesALaVista && <a href={urlAvisoLegal(idioma)}>{t.avisoLegal}</a>}
+    {!soloCopyright && legalesALaVista && <a href={urlPrivacidad(idioma)}>{t.privacidad}</a>}
   </div>
 </footer>
 

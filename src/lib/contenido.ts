@@ -53,6 +53,7 @@ export interface FotoInicio {
 
 export interface Ajustes {
   nombre: string;
+  legales?: string; // "si" para enseñar el aviso legal y la privacidad
   email: string;
   instagram: string;
   telefono?: string;
@@ -171,6 +172,9 @@ export function siguienteProyecto(proyecto: Proyecto): Proyecto | undefined {
 }
 
 export const ajustes = parse(textoAjustes) as Ajustes;
+
+// Las páginas legales se enseñan solo cuando se dice que sí en ajustes.yaml
+export const legalesALaVista = String(ajustes.legales ?? 'si').trim().toLowerCase() === 'si';
 
 export const fotosInicio: FotoInicio[] = ((parse(textoInicio)?.fotos ?? []) as unknown[]).map((valor) => {
   const ruta = String(valor).trim().replace(/^\/+/, '');

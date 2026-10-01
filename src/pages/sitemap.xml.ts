@@ -1,7 +1,7 @@
 // Mapa del sitio para Google: lista todas las páginas en los dos idiomas.
 import type { APIRoute } from 'astro';
 import { categorias, type Idioma } from '../i18n/categorias';
-import { proyectos } from '../lib/contenido';
+import { legalesALaVista, proyectos } from '../lib/contenido';
 import { urlAvisoLegal, urlCategoria, urlContacto, urlInicio, urlPrivacidad, urlProyecto } from '../lib/rutas';
 
 export const GET: APIRoute = ({ site }) => {
@@ -11,8 +11,8 @@ export const GET: APIRoute = ({ site }) => {
     ...categorias.map((categoria) => urlCategoria(categoria, idioma)),
     ...proyectos.map((proyecto) => urlProyecto(proyecto, idioma)),
     urlContacto(idioma),
-    urlAvisoLegal(idioma),
-    urlPrivacidad(idioma),
+    // Mientras estén ocultas no se le ofrecen a Google
+    ...(legalesALaVista ? [urlAvisoLegal(idioma), urlPrivacidad(idioma)] : []),
   ]);
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
