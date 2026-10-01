@@ -10,8 +10,13 @@ interface Props {
 }
 
 const { imagen, alt, sizes, prioridad = false } = Astro.props;
-const ANCHOS = [480, 800, 1200, 1600, 2000, 2500];
-const anchos = [...new Set([...ANCHOS.filter((w) => w < imagen.width), Math.min(imagen.width, 2500)])];
+// Cinco tamaños bien elegidos cubren todos los casos sin generar de más:
+//   móvil a pantalla completa (390 px × 3) pide 1170 → coge 1400
+//   móvil en pareja (175 × 3) pide 525 → coge 900
+//   ordenador retina a pantalla completa (1400 × 2) pide 2800 → coge 2800
+//   ordenador retina en pareja (700 × 2) pide 1400 → coge 1400
+const ANCHOS = [480, 900, 1400, 2000, 2800];
+const anchos = [...new Set([...ANCHOS.filter((w) => w < imagen.width), Math.min(imagen.width, 2800)])];
 ---
 
 <Image
@@ -19,6 +24,7 @@ const anchos = [...new Set([...ANCHOS.filter((w) => w < imagen.width), Math.min(
   alt={alt}
   widths={anchos}
   sizes={sizes}
+  quality={90}
   loading={prioridad ? 'eager' : 'lazy'}
   fetchpriority={prioridad ? 'high' : 'auto'}
   decoding="async"

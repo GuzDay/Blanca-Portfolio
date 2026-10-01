@@ -7,7 +7,7 @@
 //             npm run actualizar -- --sin-publicar   (prepara pero no sube)
 //
 // Qué hace con cada cosa:
-//   Fotos de proyecto → 2500 px, calidad 82
+//   Fotos de proyecto → 3000 px, calidad 92
 //   Vídeos de proyecto → 1280x720 con sonido, más su portada
 //   Carpeta "Contacto" → la lluvia de la página de contacto: fotos a 1400 px y
 //     vídeos de 4 s sin sonido (se coge el trozo del medio, que suele ser el
@@ -105,7 +105,10 @@ async function optimizarFoto(fuente, destino, lado) {
   await sharp(entrada)
     .rotate()
     .resize({ width: lado, height: lado, fit: 'inside', withoutEnlargement: true })
-    .jpeg({ quality: 82, mozjpeg: true })
+    // Calidad alta: este archivo no es el que ve nadie, es el maestro del que
+    // Astro saca los WebP de la web. Si se comprime fuerte aquí, esa pérdida ya
+    // no se recupera y se suma a la del WebP.
+    .jpeg({ quality: 92, mozjpeg: true })
     .toFile(destino);
   cuenta.fotos++;
 }
@@ -180,7 +183,7 @@ async function pasarProyectos() {
           const destino = join(carpeta, `${String(n).padStart(2, '0')}.jpg`);
           quedan.add(`${String(n).padStart(2, '0')}.jpg`);
           if (alDia(fuente, destino)) { cuenta.saltados++; continue; }
-          await optimizarFoto(fuente, destino, 2500);
+          await optimizarFoto(fuente, destino, 3000);
           console.log(`   ${categoria}/${slug}/${String(n).padStart(2, '0')}.jpg`);
         } else if (VIDEOS.has(extension)) {
           n++;
@@ -236,7 +239,7 @@ async function pasarContacto() {
     const retrato = join(CONTENIDO, 'info', 'retrato.jpg');
     if (alDia(join(base, fuenteRetrato), retrato)) cuenta.saltados++;
     else {
-      await optimizarFoto(join(base, fuenteRetrato), retrato, 1600);
+      await optimizarFoto(join(base, fuenteRetrato), retrato, 2000);
       console.log('   info/retrato.jpg');
     }
   }
