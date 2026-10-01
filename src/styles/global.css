@@ -1437,6 +1437,13 @@ body:has(.inicio-espiral) .idiomas {
   .inicio-espiral {
     margin-bottom: 2.5rem;
   }
+
+  /* Un nombre largo como "Interiorismo" mide aquí el doble que "Moda" y no
+     termina de caber. Se encoge solo en el móvil, que es donde falta sitio. */
+  .espiral-rotulo.largo {
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+  }
 }
 
 /* ---------- Lluvia de fotos (página de Contacto) ---------- */

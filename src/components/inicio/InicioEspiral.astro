@@ -163,8 +163,15 @@ const piezas = colocadas.map((pieza) => ({
       const imagen = señalada.querySelector('img');
       const caja = (imagen ?? señalada).getBoundingClientRect();
       const base = espiral.getBoundingClientRect();
-      // En el centro de la foto (el CSS lo centra sobre este punto)
-      rotulo.style.left = `${caja.left - base.left + caja.width / 2}px`;
+      // En el centro de la foto (el CSS lo centra sobre este punto), pero sin
+      // dejar que se salga por los lados: la espiral gira y, cuando una foto
+      // pasa cerca del borde, el nombre se quedaba cortado a medias.
+      const medio = rotulo.offsetWidth / 2;
+      const margen = 10;
+      const centro = caja.left - base.left + caja.width / 2;
+      const tope = base.width - medio - margen;
+      const suelo = medio + margen;
+      rotulo.style.left = `${tope < suelo ? base.width / 2 : Math.min(tope, Math.max(suelo, centro))}px`;
       rotulo.style.top = `${caja.top - base.top + caja.height / 2}px`;
       cuadro = requestAnimationFrame(seguir);
     };
@@ -173,6 +180,9 @@ const piezas = colocadas.map((pieza) => ({
       const nombre = pieza.querySelector('figcaption')?.textContent?.trim();
       if (!nombre) return;
       rotulo.textContent = nombre;
+      // Los nombres largos ("Interiorismo") van algo más pequeños: en el móvil
+      // ocupaban el doble que los cortos y se comían la pantalla.
+      rotulo.classList.toggle('largo', nombre.length > 10);
       señalada = pieza;
       rotulo.classList.add('se-ve');
       cancelAnimationFrame(cuadro);
