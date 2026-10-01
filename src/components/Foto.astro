@@ -24,7 +24,9 @@ const anchos = [...new Set([...ANCHOS.filter((w) => w < imagen.width), Math.min(
   alt={alt}
   widths={anchos}
   sizes={sizes}
-  quality={90}
+  {/* 86 en vez de 90: pesa una cuarta parte menos y la diferencia no se ve ni
+      mirando el pelo o un pata de gallo al 100%. Por debajo de 86 ya se nota. */}
+  quality={86}
   loading={prioridad ? 'eager' : 'lazy'}
   fetchpriority={prioridad ? 'high' : 'auto'}
   decoding="async"
