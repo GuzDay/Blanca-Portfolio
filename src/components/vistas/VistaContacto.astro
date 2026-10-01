@@ -4,7 +4,7 @@ import BloqueContacto from '../BloqueContacto.astro';
 import Lluvia from '../Lluvia.astro';
 import type { Idioma } from '../../i18n/categorias';
 import { textos } from '../../i18n/textos';
-import { retrato } from '../../lib/contenido';
+import { ajustes, retrato } from '../../lib/contenido';
 import { urlContacto } from '../../lib/rutas';
 
 interface Props {
@@ -19,6 +19,7 @@ const t = textos[idioma];
   idioma={idioma}
   alternativas={{ es: urlContacto('es'), en: urlContacto('en') }}
   titulo={t.contacto}
+  descripcion={t.descripcionContacto(ajustes.nombre)}
   imagenSocial={retrato}
   seccion="contacto"
   datosEstructurados

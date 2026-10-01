@@ -10,10 +10,11 @@ import type { Elemento } from '../lib/contenido';
 interface Props {
   elementos: Elemento[];
   titulo: string; // para el texto alternativo de las fotos
+  genero?: string; // "fotografía de moda": da contexto al texto alternativo
   idioma: Idioma;
 }
 
-const { elementos, titulo, idioma } = Astro.props;
+const { elementos, titulo, genero, idioma } = Astro.props;
 const filas = agruparEnFilas(elementos);
 const fotos = elementos.filter((e) => e.tipo === 'foto');
 ---
@@ -29,6 +30,7 @@ const fotos = elementos.filter((e) => e.tipo === 'foto');
               sizes="(min-width: 1440px) 700px, 50vw"
               indice={fotos.indexOf(elemento)}
               titulo={titulo}
+              genero={genero}
               idioma={idioma}
             />
           ))}
@@ -40,6 +42,7 @@ const fotos = elementos.filter((e) => e.tipo === 'foto');
             sizes={fila.elemento.vertical ? '(min-width: 800px) 760px, 100vw' : '(min-width: 1440px) 1400px, 100vw'}
             indice={fotos.indexOf(fila.elemento)}
             titulo={titulo}
+            genero={genero}
             idioma={idioma}
           />
         </div>

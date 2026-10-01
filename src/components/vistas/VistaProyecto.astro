@@ -3,7 +3,7 @@ import Base from '../../layouts/Base.astro';
 import Galeria from '../Galeria.astro';
 import type { Idioma } from '../../i18n/categorias';
 import { textos } from '../../i18n/textos';
-import { siguienteProyecto, type Proyecto } from '../../lib/contenido';
+import { ajustes, siguienteProyecto, type Proyecto } from '../../lib/contenido';
 import { urlCategoria, urlProyecto } from '../../lib/rutas';
 
 interface Props {
@@ -20,6 +20,12 @@ const siguiente = siguienteProyecto(proyecto);
   idioma={idioma}
   alternativas={{ es: urlProyecto(proyecto, 'es'), en: urlProyecto(proyecto, 'en') }}
   titulo={proyecto.titulo}
+  descripcion={t.descripcionProyecto(
+    proyecto.titulo,
+    proyecto.categoria.genero[idioma],
+    ajustes.nombre,
+    proyecto.galeria.filter((e) => e.tipo === 'foto').length,
+  )}
   imagenSocial={proyecto.portada}
   categoriaActiva={proyecto.categoria.carpeta}
 >
@@ -29,7 +35,12 @@ const siguiente = siguienteProyecto(proyecto);
       <h1>{proyecto.titulo}</h1>
     </header>
 
-    <Galeria elementos={proyecto.galeria} titulo={proyecto.titulo} idioma={idioma} />
+    <Galeria
+      elementos={proyecto.galeria}
+      titulo={proyecto.titulo}
+      genero={proyecto.categoria.genero[idioma]}
+      idioma={idioma}
+    />
 
     {
       siguiente && (

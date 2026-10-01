@@ -3,7 +3,7 @@ import Base from '../../layouts/Base.astro';
 import Galeria from '../Galeria.astro';
 import type { Categoria, Idioma } from '../../i18n/categorias';
 import { textos } from '../../i18n/textos';
-import { proyectosDe } from '../../lib/contenido';
+import { ajustes, proyectosDe } from '../../lib/contenido';
 import { urlCategoria } from '../../lib/rutas';
 
 interface Props {
@@ -22,6 +22,11 @@ const elementos = lista.flatMap((proyecto) => proyecto.galeria);
   idioma={idioma}
   alternativas={{ es: urlCategoria(categoria, 'es'), en: urlCategoria(categoria, 'en') }}
   titulo={categoria.nombre[idioma]}
+  descripcion={t.descripcionCategoria(
+    categoria.genero[idioma],
+    ajustes.nombre,
+    lista.map((p) => p.titulo),
+  )}
   imagenSocial={lista[0]?.portada}
   categoriaActiva={categoria.carpeta}
 >
@@ -30,7 +35,12 @@ const elementos = lista.flatMap((proyecto) => proyecto.galeria);
     elementos.length === 0 ? (
       <p class="vacio">{t.proximamente}</p>
     ) : (
-      <Galeria elementos={elementos} titulo={categoria.nombre[idioma]} idioma={idioma} />
+      <Galeria
+        elementos={elementos}
+        titulo={categoria.nombre[idioma]}
+        genero={categoria.genero[idioma]}
+        idioma={idioma}
+      />
     )
   }
 </Base>

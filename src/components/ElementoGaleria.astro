@@ -10,11 +10,15 @@ interface Props {
   sizes: string;
   indice: number; // posición de la foto dentro del visor
   titulo: string;
+  genero?: string;
   idioma: Idioma;
 }
 
-const { elemento, sizes, indice, titulo, idioma } = Astro.props;
+const { elemento, sizes, indice, titulo, genero, idioma } = Astro.props;
 const t = textos[idioma];
+// "Basyco - Retiro, fotografía de moda — foto 3" dice bastante más que
+// "Moda — foto 3", tanto a quien usa lector de pantalla como a Google Imágenes.
+const describir = genero ? t.fotoDe(titulo, genero, indice + 1) : `${titulo} — ${t.foto} ${indice + 1}`;
 ---
 
 {
@@ -22,7 +26,7 @@ const t = textos[idioma];
     <button type="button" class="abrir-visor" data-indice={indice} aria-label={`${t.ampliar} ${indice + 1}`}>
       <Foto
         imagen={elemento.imagen}
-        alt={`${titulo} — ${t.foto} ${indice + 1}`}
+        alt={describir}
         sizes={sizes}
         prioridad={indice === 0}
         calidad={elemento.calidad}
