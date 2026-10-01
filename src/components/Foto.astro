@@ -7,9 +7,10 @@ interface Props {
   alt: string;
   sizes: string; // qué ancho ocupa en pantalla, para elegir el tamaño justo
   prioridad?: boolean; // true solo para la primera foto visible
+  calidad?: number; // la que necesita esta foto en concreto (ver contenido/calidades.json)
 }
 
-const { imagen, alt, sizes, prioridad = false } = Astro.props;
+const { imagen, alt, sizes, prioridad = false, calidad = 86 } = Astro.props;
 // Cinco tamaños bien elegidos cubren todos los casos sin generar de más:
 //   móvil a pantalla completa (390 px × 3) pide 1170 → coge 1400
 //   móvil en pareja (175 × 3) pide 525 → coge 900
@@ -24,9 +25,7 @@ const anchos = [...new Set([...ANCHOS.filter((w) => w < imagen.width), Math.min(
   alt={alt}
   widths={anchos}
   sizes={sizes}
-  {/* 86 en vez de 90: pesa una cuarta parte menos y la diferencia no se ve ni
-      mirando el pelo o un pata de gallo al 100%. Por debajo de 86 ya se nota. */}
-  quality={86}
+  quality={calidad}
   loading={prioridad ? 'eager' : 'lazy'}
   fetchpriority={prioridad ? 'high' : 'auto'}
   decoding="async"

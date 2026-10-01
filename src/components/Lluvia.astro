@@ -32,7 +32,7 @@ const elementos = await Promise.all(
         </figure>
       ) : (
         <figure class="lluvia-foto" data-discreta={DISIMULADAS.has(elemento.nombre) || undefined}>
-          <Foto imagen={elemento.imagen} alt="" sizes="(max-width: 700px) 22vw, 10vw" />
+          <Foto imagen={elemento.imagen} alt="" sizes="(max-width: 700px) 22vw, 10vw" calidad={elemento.calidad} />
         </figure>
       ),
     )

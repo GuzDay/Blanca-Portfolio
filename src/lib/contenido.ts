@@ -4,12 +4,23 @@ import { parse } from 'yaml';
 import { categorias, type Categoria } from '../i18n/categorias';
 import textoAjustes from '../../contenido/ajustes.yaml?raw';
 import textoInicio from '../../contenido/home.yaml?raw';
+import tablaCalidades from '../../contenido/calidades.json';
+
+// Cada foto se comprime con la calidad que necesita, no con una para todas: la
+// calcula scripts/actualizar.mjs y la deja apuntada en contenido/calidades.json.
+// Una pared lisa aguanta mucha compresión; una foto con grano o detalle fino,
+// no. Con un número único, o pesaban de más las fáciles o salían regulares las
+// difíciles.
+const CALIDAD_POR_DEFECTO = 86;
+export const calidadDe = (ruta: string): number =>
+  (tablaCalidades as Record<string, number>)[ruta.replace('/contenido/', '')] ?? CALIDAD_POR_DEFECTO;
 
 export interface Foto {
   tipo: 'foto';
   archivo: string;
   imagen: ImageMetadata;
   vertical: boolean;
+  calidad: number;
 }
 
 export interface Video {
@@ -37,6 +48,7 @@ export interface FotoInicio {
   imagen: ImageMetadata;
   vertical: boolean;
   proyecto: Proyecto;
+  calidad: number;
 }
 
 export interface Ajustes {
@@ -116,7 +128,13 @@ function leerProyecto(rutaYaml: string, texto: string): Proyecto {
       });
     } else if (!basesVideo.has(base)) {
       const imagen = imagenes[ruta];
-      galeria.push({ tipo: 'foto', archivo, imagen, vertical: imagen.height > imagen.width });
+      galeria.push({
+        tipo: 'foto',
+        archivo,
+        imagen,
+        vertical: imagen.height > imagen.width,
+        calidad: calidadDe(ruta),
+      });
     }
   }
 
@@ -162,11 +180,17 @@ export const fotosInicio: FotoInicio[] = ((parse(textoInicio)?.fotos ?? []) as u
   if (!imagen || !proyecto) {
     throw new Error(`home.yaml: no se encuentra la foto "${ruta}" (formato: categoría/proyecto/archivo)`);
   }
-  return { imagen, vertical: imagen.height > imagen.width, proyecto };
+  return {
+    imagen,
+    vertical: imagen.height > imagen.width,
+    proyecto,
+    calidad: calidadDe(`/contenido/proyectos/${ruta}`),
+  };
 });
 
 const rutaRetrato = Object.keys(imagenes).find((ruta) => ruta.startsWith('/contenido/info/retrato.'));
 export const retrato: ImageMetadata | undefined = rutaRetrato ? imagenes[rutaRetrato] : undefined;
+export const calidadRetrato = rutaRetrato ? calidadDe(rutaRetrato) : CALIDAD_POR_DEFECTO;
 
 // Material de la lluvia de la página de Contacto: las fotos y los vídeos que hay
 // en contenido/contacto. Cada vídeo lleva su portada, que es la foto con el
@@ -177,6 +201,7 @@ export interface ElementoLluvia {
   src?: string; // solo los vídeos
   vertical: boolean;
   nombre: string; // el número del archivo ("05"), para poder señalar una pieza concreta
+  calidad: number;
 }
 
 export const lluviaContacto: ElementoLluvia[] = (() => {
@@ -194,6 +219,7 @@ export const lluviaContacto: ElementoLluvia[] = (() => {
       imagen,
       vertical: imagen.height > imagen.width,
       nombre: base,
+      calidad: calidadDe(ruta),
       orden: base,
     });
   }
@@ -208,6 +234,7 @@ export const lluviaContacto: ElementoLluvia[] = (() => {
       src: videosContacto[ruta],
       vertical: portada.height > portada.width,
       nombre: base,
+      calidad: calidadDe(`${carpeta}${base}.jpg`),
       orden: base,
     });
   }

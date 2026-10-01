@@ -10,7 +10,11 @@ import { categorias } from '../src/i18n/categorias.ts';
 const CONTENIDO = fileURLToPath(new URL('../contenido/', import.meta.url));
 const MB = 1024 * 1024;
 const LIMITE_ARCHIVO = 50 * MB; // GitHub avisa a partir de 50 MB y rechaza archivos de más de 100 MB
-const AVISO_FOTO = 3 * MB;
+// Estas fotos son los maestros: no se publican tal cual, la web sirve WebP
+// sacados de ellas y el resto se borra al construir. Así que pesar no es un
+// problema para el visitante, solo para el tamaño del repositorio. El aviso
+// salta cuando una se va de lo razonable incluso para eso.
+const AVISO_FOTO = 12 * MB;
 const AVISO_TOTAL = 350 * MB; // la web publicada ocupa ~3 veces las fotos, y GitHub Pages permite 1 GB
 
 const FOTOS = new Set(['.jpg', '.jpeg', '.png', '.webp']);
@@ -120,7 +124,9 @@ for (const categoria of listar(carpetaProyectos)) {
       if (FOTOS.has(extension)) {
         basesFoto.add(base);
         if (info.size > AVISO_FOTO) {
-          avisos.push(`${ruta}/${archivo}: la foto pesa ${mb(info.size)}. Mejor exportarla a 2500 px y calidad 80 (≈ 1 MB).`);
+          avisos.push(
+            `${ruta}/${archivo}: el maestro pesa ${mb(info.size)}. No llega así a la web (de él salen los WebP), pero abulta el repositorio.`,
+          );
         }
       } else if (VIDEOS.has(extension)) {
         videos.push({ archivo, base });

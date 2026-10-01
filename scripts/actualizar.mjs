@@ -7,7 +7,8 @@
 //             npm run actualizar -- --sin-publicar   (prepara pero no sube)
 //
 // Qué hace con cada cosa:
-//   Fotos de proyecto → 3000 px, calidad 92
+//   Fotos de proyecto → 3000 px. Las que ya caben se copian tal cual, sin
+//     recomprimirlas; solo se reduce (calidad 92) lo que no cabe.
 //   Vídeos de proyecto → 1280x720 con sonido, más su portada
 //   Carpeta "Contacto" → la lluvia de la página de contacto: fotos a 1400 px y
 //     vídeos de 4 s sin sonido (se coge el trozo del medio, que suele ser el
@@ -17,7 +18,9 @@
 // tocado desde entonces, se salta. Y lo que Blanca borre de su carpeta,
 // desaparece también de la web.
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync } from 'node:fs';
+import {
+  copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync,
+} from 'node:fs';
 import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ffmpeg from 'ffmpeg-static';
@@ -102,16 +105,72 @@ async function optimizarFoto(fuente, destino, lado) {
     entrada = join(TEMPORAL, 'convertida.jpg');
     correr('sips', ['-s', 'format', 'jpeg', fuente, '--out', entrada]);
   }
-  await sharp(entrada)
-    .rotate()
-    .resize({ width: lado, height: lado, fit: 'inside', withoutEnlargement: true })
-    // Calidad alta: este archivo no es el que ve nadie, es el maestro del que
-    // Astro saca los WebP de la web. Si se comprime fuerte aquí, esa pérdida ya
-    // no se recupera y se suma a la del WebP.
-    .jpeg({ quality: 92, mozjpeg: true })
-    .toFile(destino);
+
+  // Este archivo no lo ve nadie: es el maestro del que Astro saca los WebP de
+  // la web. Si la foto ya cabe, se copia tal cual. Recomprimirla aquí sería una
+  // pérdida de calidad que ya no se recupera, y encima sin ganar nada: quien
+  // manda en el peso de la web es el WebP, no esto.
+  const ficha = await sharp(entrada).metadata();
+  const yaCabe = Math.max(ficha.width, ficha.height) <= lado;
+  const derecha = !ficha.orientation || ficha.orientation === 1;
+  if (yaCabe && derecha && ficha.format === 'jpeg') {
+    copyFileSync(entrada, destino);
+  } else {
+    await sharp(entrada)
+      .rotate()
+      .resize({ width: lado, height: lado, fit: 'inside', withoutEnlargement: true })
+      .jpeg({ quality: 92, mozjpeg: true })
+      .toFile(destino);
+  }
   cuenta.fotos++;
 }
+
+// ---------- Cuánta calidad necesita cada foto ----------
+// Una misma calidad para todas deja unas estupendas y otras regulares: las que
+// tienen grano o mucho detalle fino se estropean antes que una pared lisa. Aquí
+// se busca, foto a foto, la calidad más baja que todavía se ve bien, y la web
+// usa esa. Las fáciles pesan menos y las difíciles dejan de quedarse atrás.
+const DIFERENCIA_ACEPTABLE = 2.6; // elegido midiendo; por encima se empieza a notar
+const CALIDADES = [70, 74, 78, 82, 86, 90, 94];
+const CALIDAD_POR_DEFECTO = 86;
+const calidades = {};
+
+async function calidadQueNecesita(maestro) {
+  // Una foto pequeña la acaba estirando el navegador para llenar su hueco, y
+  // estirar amplifica cualquier defecto de la compresión. A esas no se les baja
+  // tanto la calidad aunque la medición diga que aguantan.
+  const ficha = await sharp(maestro).metadata();
+  const seVaAEstirar = Math.max(ficha.width, ficha.height) < 1800;
+  const suelo = seVaAEstirar ? 82 : 70;
+
+  // Se compara al tamaño que recibe un móvil, que es donde más se mira
+  const base = sharp(maestro).resize({ width: 1400, withoutEnlargement: true });
+  const referencia = await base.clone().raw().toBuffer();
+  for (const calidad of CALIDADES.filter((q) => q >= suelo)) {
+    const prueba = await base.clone().webp({ quality: calidad }).toBuffer();
+    const pixeles = await sharp(prueba).raw().toBuffer();
+    const hasta = Math.min(pixeles.length, referencia.length);
+    let suma = 0;
+    for (let i = 0; i < hasta; i++) suma += Math.abs(pixeles[i] - referencia[i]);
+    if (suma / hasta <= DIFERENCIA_ACEPTABLE) return calidad;
+  }
+  return 96;
+}
+
+// Apunta la calidad de una foto recién preparada (o conserva la que ya tenía)
+async function anotarCalidad(destino, rehecha) {
+  const clave = destino.slice(CONTENIDO.length + 1);
+  if (!rehecha && calidadesPrevias[clave]) {
+    calidades[clave] = calidadesPrevias[clave];
+    return;
+  }
+  calidades[clave] = await calidadQueNecesita(destino);
+}
+
+const RUTA_CALIDADES = join(CONTENIDO, 'calidades.json');
+const calidadesPrevias = existsSync(RUTA_CALIDADES)
+  ? JSON.parse(readFileSync(RUTA_CALIDADES, 'utf8'))
+  : {};
 
 async function portada(video, destino) {
   mkdirSync(TEMPORAL, { recursive: true });
@@ -182,8 +241,13 @@ async function pasarProyectos() {
           n++;
           const destino = join(carpeta, `${String(n).padStart(2, '0')}.jpg`);
           quedan.add(`${String(n).padStart(2, '0')}.jpg`);
-          if (alDia(fuente, destino)) { cuenta.saltados++; continue; }
+          if (alDia(fuente, destino)) {
+            cuenta.saltados++;
+            await anotarCalidad(destino, false);
+            continue;
+          }
           await optimizarFoto(fuente, destino, 3000);
+          await anotarCalidad(destino, true);
           console.log(`   ${categoria}/${slug}/${String(n).padStart(2, '0')}.jpg`);
         } else if (VIDEOS.has(extension)) {
           n++;
@@ -237,9 +301,12 @@ async function pasarContacto() {
   );
   if (fuenteRetrato) {
     const retrato = join(CONTENIDO, 'info', 'retrato.jpg');
-    if (alDia(join(base, fuenteRetrato), retrato)) cuenta.saltados++;
-    else {
+    if (alDia(join(base, fuenteRetrato), retrato)) {
+      cuenta.saltados++;
+      await anotarCalidad(retrato, false);
+    } else {
       await optimizarFoto(join(base, fuenteRetrato), retrato, 2000);
+      await anotarCalidad(retrato, true);
       console.log('   info/retrato.jpg');
     }
   }
@@ -256,8 +323,13 @@ async function pasarContacto() {
     if (FOTOS.has(extension)) {
       const salida = join(destino, `${n}.jpg`);
       quedan.add(`${n}.jpg`);
-      if (alDia(fuente, salida)) { cuenta.saltados++; continue; }
+      if (alDia(fuente, salida)) {
+        cuenta.saltados++;
+        await anotarCalidad(salida, false);
+        continue;
+      }
       await optimizarFoto(fuente, salida, 1400);
+      await anotarCalidad(salida, true);
       console.log(`   contacto/${n}.jpg`);
     } else if (VIDEOS.has(extension)) {
       const salida = join(destino, `${n}.mp4`);
@@ -298,8 +370,16 @@ console.log(`\nLeyendo: ${origen}\n`);
 await pasarProyectos();
 await pasarContacto();
 
+// La calidad que necesita cada foto, para que la web la use
+writeFileSync(RUTA_CALIDADES, `${JSON.stringify(calidades, Object.keys(calidades).sort(), 2)}\n`);
+
+const puestas = Object.values(calidades);
+const reparto = {};
+for (const q of puestas) reparto[q] = (reparto[q] ?? 0) + 1;
+
 console.log(`
 Resumen: ${cuenta.fotos} fotos y ${cuenta.videos} vídeos preparados · ${cuenta.saltados} ya estaban al día · ${cuenta.borrados} retirados`);
+console.log(`Calidad a medida: ${Object.keys(reparto).sort((a, b) => a - b).map((q) => `${reparto[q]} a ${q}`).join(' · ')}`);
 
 if (publicar) publicarEnLaWeb();
 else console.log('\nPreparado sin publicar (--sin-publicar). Para verlo: npm run dev\n');
