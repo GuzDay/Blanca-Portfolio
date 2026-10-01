@@ -111,12 +111,33 @@ const t = textos[Astro.props.idioma];
       if (conTexto) destino.alt = origen.alt;
     };
 
-    const colocar = (px: number) => carro.style.setProperty('--arrastre', `${px}px`);
+    // Cuánto se corre el carro. Mientras el dedo se mueve se escribe una sola
+    // vez por fotograma: escribirlo en cada evento obliga al navegador a
+    // recalcular estilos decenas de veces por segundo y el arrastre va a tirones.
+    let desplazamiento = 0;
+    let fotogramaPedido = 0;
+    const colocar = (px: number) => {
+      desplazamiento = px;
+      if (fotogramaPedido) return;
+      fotogramaPedido = requestAnimationFrame(() => {
+        fotogramaPedido = 0;
+        carro.style.setProperty('--arrastre', `${desplazamiento}px`);
+      });
+    };
+    // Para empezar o cortar una animación hace falta escribirlo en el acto
+    const colocarYa = (px: number) => {
+      desplazamiento = px;
+      if (fotogramaPedido) {
+        cancelAnimationFrame(fotogramaPedido);
+        fotogramaPedido = 0;
+      }
+      carro.style.setProperty('--arrastre', `${px}px`);
+    };
 
     const mostrar = (indice: number) => {
       actual = (indice + botones.length) % botones.length;
       carro.classList.remove('deslizando');
-      colocar(0);
+      colocarYa(0);
       pintar(imagen, actual, true);
       pintar(vecinaAntes, actual - 1, false);
       pintar(vecinaDespues, actual + 1, false);
@@ -128,28 +149,34 @@ const t = textos[Astro.props.idioma];
 
     // Cambio de foto con la animación del carrusel: la actual se va por un lado
     // y la vecina ocupa su sitio. Al terminar se recolocan las tres.
-    let deslizando = false;
+    // Si llega una orden nueva con la anterior a medias, la anterior se da por
+    // terminada en el acto y la nueva arranca desde ahí. Antes se descartaba, y
+    // por eso pasar fotos rápido perdía clics y deslizamientos.
+    let cerrarDeslizamiento: (() => void) | null = null;
+
     const deslizar = (direccion: number) => {
-      if (deslizando || botones.length < 2) return;
+      if (botones.length < 2) return;
+      cerrarDeslizamiento?.();
+      // Medir fuerza además el repintado: sin eso, quitar y volver a poner la
+      // clase en el mismo fotograma se fundiría en uno solo y no habría animación.
       const ancho = carro.getBoundingClientRect().width;
       if (!ancho) {
         mostrar(actual + direccion);
         return;
       }
-      deslizando = true;
       carro.classList.add('deslizando');
-      colocar(-direccion * ancho);
-      const terminar = () => {
-        if (!deslizando) return;
-        deslizando = false;
+      colocarYa(-direccion * ancho);
+      const alTerminar = (evento: TransitionEvent) => {
+        if (evento.target === carro) cerrarDeslizamiento?.();
+      };
+      const reloj = window.setTimeout(() => cerrarDeslizamiento?.(), 450); // por si no avisa
+      cerrarDeslizamiento = () => {
+        cerrarDeslizamiento = null;
+        window.clearTimeout(reloj);
         carro.removeEventListener('transitionend', alTerminar);
         mostrar(actual + direccion);
       };
-      const alTerminar = (evento: TransitionEvent) => {
-        if (evento.target === carro) terminar();
-      };
       carro.addEventListener('transitionend', alTerminar);
-      window.setTimeout(terminar, 600); // por si la animación no avisa
     };
 
     imagen.addEventListener('load', ajustarFlechas);
@@ -183,49 +210,75 @@ const t = textos[Astro.props.idioma];
     let inicioX: number | null = null;
     let arrastre = 0;
     let huboDeslizamiento = false;
+    let dedo = -1;
+    // Para reconocer un golpe seco: por dónde iba el dedo y cuándo
+    let ultimoX = 0;
+    let ultimoInstante = 0;
+    let velocidad = 0; // píxeles por milisegundo
+
+    function soltarArrastre() {
+      if (inicioX === null) return;
+      inicioX = null;
+      if (dedo >= 0 && escenario.hasPointerCapture(dedo)) escenario.releasePointerCapture(dedo);
+      dedo = -1;
+
+      const ancho = carro.getBoundingClientRect().width || 1;
+      // Pasa de foto si se ha recorrido una quinta parte de la pantalla...
+      const umbral = Math.min(70, ancho * 0.2);
+      // ...o si ha sido un golpe seco, aunque sea corto: es lo que espera
+      // cualquiera que pase fotos rápido con el pulgar.
+      const golpe = Math.abs(velocidad) > 0.35 && Math.abs(arrastre) > 10;
+      carro.classList.add('deslizando');
+      if (golpe) deslizar(velocidad < 0 ? 1 : -1);
+      else if (Math.abs(arrastre) >= umbral) deslizar(arrastre < 0 ? 1 : -1);
+      else colocarYa(0);
+      arrastre = 0;
+      velocidad = 0;
+    }
 
     escenario.addEventListener('pointerdown', (evento) => {
-      if (botones.length < 2 || deslizando || pellizcoInicial) return;
+      if (botones.length < 2 || pellizcoInicial) return;
+      if ((evento.target as HTMLElement).closest('button')) return; // las flechas no se arrastran
       if (inicioX !== null) {
-        // Ha entrado un segundo dedo: esto ya no es un arrastre
-        inicioX = null;
-        colocar(0);
+        soltarArrastre(); // ha entrado un segundo dedo: esto ya no es un arrastre
         return;
       }
+      // Si quedaba un cambio de foto a medias, se da por hecho: así este gesto
+      // empieza limpio sobre la foto que toca en vez de ignorarse.
+      cerrarDeslizamiento?.();
+      dedo = evento.pointerId;
+      // Capturar el puntero hace que el gesto siga siendo nuestro aunque el dedo
+      // se salga de la foto o del borde de la pantalla.
+      escenario.setPointerCapture(dedo);
       inicioX = evento.clientX;
       arrastre = 0;
+      velocidad = 0;
+      ultimoX = evento.clientX;
+      ultimoInstante = evento.timeStamp;
       huboDeslizamiento = false;
       carro.classList.remove('deslizando');
     });
 
     escenario.addEventListener('pointermove', (evento) => {
-      if (inicioX === null) return;
+      if (inicioX === null || evento.pointerId !== dedo) return;
       if (pellizcoInicial) {
-        inicioX = null;
-        colocar(0);
+        soltarArrastre();
         return;
       }
       arrastre = evento.clientX - inicioX;
       if (Math.abs(arrastre) > 8) huboDeslizamiento = true;
+      const transcurrido = evento.timeStamp - ultimoInstante;
+      if (transcurrido > 0) {
+        // Se mezcla con lo anterior para que un temblor del último instante no mande
+        velocidad = velocidad * 0.4 + ((evento.clientX - ultimoX) / transcurrido) * 0.6;
+        ultimoX = evento.clientX;
+        ultimoInstante = evento.timeStamp;
+      }
       colocar(arrastre);
     });
 
-    const soltarArrastre = () => {
-      if (inicioX === null) return;
-      inicioX = null;
-      const ancho = carro.getBoundingClientRect().width || 1;
-      // Con recorrer una quinta parte de la pantalla ya pasa de foto
-      const umbral = Math.min(70, ancho * 0.2);
-      carro.classList.add('deslizando');
-      if (arrastre <= -umbral) deslizar(1);
-      else if (arrastre >= umbral) deslizar(-1);
-      else colocar(0);
-      arrastre = 0;
-    };
-
     escenario.addEventListener('pointerup', soltarArrastre);
     escenario.addEventListener('pointercancel', soltarArrastre);
-    escenario.addEventListener('pointerleave', soltarArrastre);
 
     // Ampliar la foto pellizcando con dos dedos. Al soltar, vuelve a su tamaño sola.
     const AMPLIACION_MAXIMA = 4;
@@ -244,7 +297,7 @@ const t = textos[Astro.props.idioma];
       'touchstart',
       (evento) => {
         if (evento.touches.length !== 2) return;
-        inicioX = null; // dos dedos no son un deslizamiento para pasar de foto
+        soltarArrastre(); // dos dedos no son un deslizamiento para pasar de foto
         pellizcoInicial = separacion(evento.touches);
         // Se amplía por donde pellizcas, no por el centro de la foto
         const caja = imagen.getBoundingClientRect();
@@ -279,10 +332,16 @@ const t = textos[Astro.props.idioma];
       visor.addEventListener(gesto, (evento) => evento.preventDefault());
     }
 
-    // Tocar fuera de la foto también cierra (la foto, las flechas y los botones no)
+    // Tocar fuera de la foto también cierra (la foto, las flechas y los botones no).
+    // El carro cubre todo el escenario, así que el margen que rodea a la foto es
+    // un ".visor-hueco": sin contarlo, en el móvil no cerraba por ninguna parte.
     visor.addEventListener('click', (evento) => {
       if (huboDeslizamiento) return;
-      if (evento.target === visor || evento.target === escenario) visor.close();
+      const donde = evento.target as HTMLElement;
+      if (donde === imagen || donde.closest('button')) return;
+      if (donde === visor || donde === escenario || donde === carro || donde.closest('.visor-hueco')) {
+        visor.close();
+      }
     });
   }
 </script>

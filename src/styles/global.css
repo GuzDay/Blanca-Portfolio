@@ -812,7 +812,11 @@ html:has(.visor[open]) {
 .visor-escenario {
   position: relative;
   min-height: 0;
-  touch-action: pan-y;
+  /* Con el visor abierto la página no se desplaza, así que no hay nada que el
+     navegador deba mover por su cuenta. Dejándole el eje vertical ("pan-y") se
+     quedaba con los gestos algo inclinados a mitad de camino y el arrastre se
+     cortaba. El pellizco para ampliar lo lleva el propio visor. */
+  touch-action: none;
 }
 
 /* Fila con las tres fotos. Está corrida una foto a la izquierda para que se vea
