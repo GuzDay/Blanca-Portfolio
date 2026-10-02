@@ -80,6 +80,38 @@ const leerCarpeta = (nombre) => {
   return { orden: partes?.[1] ? Number(partes[1]) : 999, titulo: (partes?.[2] ?? nombre).trim() };
 };
 const alDia = (fuente, destino) => existsSync(destino) && statSync(destino).mtimeMs >= statSync(fuente).mtimeMs;
+
+// ---------- De qué archivo salió cada foto de la web ----------
+// Las fotos de un proyecto se guardan por POSICIÓN (01.jpg, 02.jpg...), no por
+// nombre. Si Blanca reordena su carpeta, renombrar no cambia la fecha del
+// archivo, así que mirando solo fechas el cambio pasaría desapercibido y la web
+// se quedaría con el orden viejo sin avisar de nada. Por eso se apunta de qué
+// archivo salió cada una, con su tamaño y su fecha: si cualquiera de las tres
+// cosas no cuadra, se rehace.
+const RUTA_FUENTES = join(CONTENIDO, 'fuentes.json');
+const fuentesPrevias = existsSync(RUTA_FUENTES) ? JSON.parse(readFileSync(RUTA_FUENTES, 'utf8')) : {};
+const fuentes = {};
+
+const señas = (fuente) => {
+  const info = statSync(fuente);
+  // La ruta se guarda relativa a la carpeta de Blanca, para que siga valiendo
+  // si algún día esa carpeta cambia de sitio
+  return { de: fuente.slice(origen.length + 1), bytes: info.size, fecha: Math.round(info.mtimeMs) };
+};
+
+const mismoArchivo = (fuente, destino) => {
+  if (!existsSync(destino)) return false;
+  const antes = fuentesPrevias[destino.slice(CONTENIDO.length + 1)];
+  // La primera vez todavía no hay registro de nada: se confía en la fecha, como
+  // se hacía antes, y de paso queda apuntado. A partir de ahí ya se detecta todo.
+  if (!antes) return alDia(fuente, destino);
+  const ahora = señas(fuente);
+  return antes.de === ahora.de && antes.bytes === ahora.bytes && antes.fecha === ahora.fecha;
+};
+
+const apuntarFuente = (fuente, destino) => {
+  fuentes[destino.slice(CONTENIDO.length + 1)] = señas(fuente);
+};
 const mb = (bytes) => `${(bytes / 1048576).toFixed(1)} MB`;
 
 const cuenta = { fotos: 0, videos: 0, saltados: 0, borrados: 0 };
@@ -241,7 +273,8 @@ async function pasarProyectos() {
           n++;
           const destino = join(carpeta, `${String(n).padStart(2, '0')}.jpg`);
           quedan.add(`${String(n).padStart(2, '0')}.jpg`);
-          if (alDia(fuente, destino)) {
+          apuntarFuente(fuente, destino);
+          if (mismoArchivo(fuente, destino)) {
             cuenta.saltados++;
             await anotarCalidad(destino, false);
             continue;
@@ -255,7 +288,8 @@ async function pasarProyectos() {
           const destino = join(carpeta, `${nombre}.mp4`);
           quedan.add(`${nombre}.mp4`);
           quedan.add(`${nombre}.jpg`);
-          if (alDia(fuente, destino)) { cuenta.saltados++; continue; }
+          apuntarFuente(fuente, destino);
+          if (mismoArchivo(fuente, destino)) { cuenta.saltados++; continue; }
           console.log(`   ${categoria}/${slug}/${nombre}.mp4 (comprimiendo vídeo, tarda un poco)`);
           await optimizarVideoProyecto(fuente, destino);
         }
@@ -370,8 +404,16 @@ console.log(`\nLeyendo: ${origen}\n`);
 await pasarProyectos();
 await pasarContacto();
 
+// Ordenado por nombre, para que los cambios se lean bien en el historial.
+// (Ojo: el segundo argumento de JSON.stringify no sirve para esto; ahí una
+// lista de claves actúa de filtro y se lleva por delante lo que haya dentro.)
+const ordenado = (objeto) =>
+  Object.fromEntries(Object.keys(objeto).sort().map((clave) => [clave, objeto[clave]]));
+
 // La calidad que necesita cada foto, para que la web la use
-writeFileSync(RUTA_CALIDADES, `${JSON.stringify(calidades, Object.keys(calidades).sort(), 2)}\n`);
+writeFileSync(RUTA_CALIDADES, `${JSON.stringify(ordenado(calidades), null, 2)}\n`);
+// Y de qué archivo de Blanca salió cada una, para detectar reordenaciones
+writeFileSync(RUTA_FUENTES, `${JSON.stringify(ordenado(fuentes), null, 2)}\n`);
 
 const puestas = Object.values(calidades);
 const reparto = {};
