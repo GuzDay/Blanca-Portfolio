@@ -4,20 +4,21 @@
 #
 # Doce fotos: dos de cada categoría.
 # El ORDEN importa: la espiral coloca cada foto según su posición en esta lista,
-# así que dos fotos parecidas conviene separarlas varios puestos. Las tres de
-# espacios vacíos (Cold Culture aérea y las dos de la exposición de Helarea) van
-# en los puestos 6, 10 y 12, que es donde quedan más lejos unas de otras.
+# así que las dos de una misma categoría conviene tenerlas lejos. Ahora mismo
+# ninguna pareja está a menos de cinco puestos:
+#   moda 1 y 7 · viajes 2 y 12 · interiorismo 3 y 8
+#   música 4 y 9 · eventos 5 y 10 · foto fija 6 y 11
 
 fotos:
   - moda/basyco-estudio/01.jpg
   - viajes/londres/01.jpg
   - interiorismo/yuxus-tienda-de-ropa/04.jpg
   - musica/juicy-sessions-sesion-de-musica/08.jpg
-  - viajes/londres/14.jpg
+  - eventos/helarea-evento/01.jpg
   - foto-fija/cold-culture/02.jpg
   - moda/white-y-one-1/02.jpg
   - interiorismo/viviendas/16.jpg
   - musica/juicy-sessions-sesion-de-musica/02.jpg
-  - eventos/helarea-evento/05.jpg
+  - eventos/helarea-evento/04.jpg
   - foto-fija/cold-culture/06.jpg
-  - eventos/helarea-evento/01.jpg
+  - viajes/londres/14.jpg
