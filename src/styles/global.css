@@ -679,8 +679,10 @@ html:has(.menu-abierto) {
   align-items: start;
 }
 
+/* Una vertical que va sola mide lo mismo que una de las de una pareja, para
+   que todas las verticales de la galería tengan el mismo tamaño. */
 .fila.sola.vertical {
-  width: min(100%, 760px);
+  width: calc((100% - var(--hueco)) / 2);
   margin-inline: auto;
 }
 

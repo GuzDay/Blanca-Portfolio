@@ -39,7 +39,9 @@ const fotos = elementos.filter((e) => e.tipo === 'foto');
         <div class:list={['fila', 'sola', fila.elemento.vertical && 'vertical']}>
           <ElementoGaleria
             elemento={fila.elemento}
-            sizes={fila.elemento.vertical ? '(min-width: 800px) 760px, 100vw' : '(min-width: 1440px) 1400px, 100vw'}
+            {/* Una vertical sola ocupa lo mismo que una de una pareja, así que
+                pide el mismo tamaño de archivo; una apaisada va a todo lo ancho. */}
+            sizes={fila.elemento.vertical ? '(min-width: 1440px) 700px, 50vw' : '(min-width: 1440px) 1400px, 100vw'}
             indice={fotos.indexOf(fila.elemento)}
             titulo={titulo}
             genero={genero}
