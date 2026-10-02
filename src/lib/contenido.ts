@@ -24,6 +24,7 @@ export const calidadDe = (ruta: string): number =>
 export interface Foto {
   tipo: 'foto';
   archivo: string;
+  proyecto: string; // a cuál pertenece: una pareja nunca mezcla dos proyectos
   imagen: ImageMetadata;
   vertical: boolean;
   calidad: number;
@@ -33,6 +34,7 @@ export interface Foto {
 export interface Video {
   tipo: 'video';
   archivo: string;
+  proyecto: string;
   src: string;
   portada?: ImageMetadata;
   ancho: number;
@@ -128,6 +130,7 @@ function leerProyecto(rutaYaml: string, texto: string): Proyecto {
       galeria.push({
         tipo: 'video',
         archivo,
+        proyecto: slug,
         src: videos[ruta],
         portada,
         ancho: portada?.width ?? 16,
@@ -139,6 +142,7 @@ function leerProyecto(rutaYaml: string, texto: string): Proyecto {
       galeria.push({
         tipo: 'foto',
         archivo,
+        proyecto: slug,
         imagen,
         vertical: imagen.height > imagen.width,
         calidad: calidadDe(ruta),
