@@ -88,6 +88,13 @@ const alDia = (fuente, destino) => existsSync(destino) && statSync(destino).mtim
 // se quedaría con el orden viejo sin avisar de nada. Por eso se apunta de qué
 // archivo salió cada una, con su tamaño y su fecha: si cualquiera de las tres
 // cosas no cuadra, se rehace.
+// Una foto cuyo nombre lleve "sola" no se empareja con la de al lado: ocupa
+// ella sola el ancho. Es la única decisión de maquetación que se toma a mano,
+// y va en el nombre del archivo para que viaje con la foto si se reordena.
+const RUTA_MAQUETACION = join(CONTENIDO, 'maquetacion.json');
+const vaSola = (archivo) => /(^|[\s_-])sola([\s_.-]|$)/i.test(archivo);
+const solas = [];
+
 const RUTA_FUENTES = join(CONTENIDO, 'fuentes.json');
 const fuentesPrevias = existsSync(RUTA_FUENTES) ? JSON.parse(readFileSync(RUTA_FUENTES, 'utf8')) : {};
 const fuentes = {};
@@ -274,6 +281,7 @@ async function pasarProyectos() {
           const destino = join(carpeta, `${String(n).padStart(2, '0')}.jpg`);
           quedan.add(`${String(n).padStart(2, '0')}.jpg`);
           apuntarFuente(fuente, destino);
+          if (vaSola(archivo)) solas.push(destino.slice(CONTENIDO.length + 1));
           if (mismoArchivo(fuente, destino)) {
             cuenta.saltados++;
             await anotarCalidad(destino, false);
@@ -289,6 +297,7 @@ async function pasarProyectos() {
           quedan.add(`${nombre}.mp4`);
           quedan.add(`${nombre}.jpg`);
           apuntarFuente(fuente, destino);
+          if (vaSola(archivo)) solas.push(destino.slice(CONTENIDO.length + 1));
           if (mismoArchivo(fuente, destino)) { cuenta.saltados++; continue; }
           console.log(`   ${categoria}/${slug}/${nombre}.mp4 (comprimiendo vídeo, tarda un poco)`);
           await optimizarVideoProyecto(fuente, destino);
@@ -414,6 +423,8 @@ const ordenado = (objeto) =>
 writeFileSync(RUTA_CALIDADES, `${JSON.stringify(ordenado(calidades), null, 2)}\n`);
 // Y de qué archivo de Blanca salió cada una, para detectar reordenaciones
 writeFileSync(RUTA_FUENTES, `${JSON.stringify(ordenado(fuentes), null, 2)}\n`);
+// Las que van solas, por llevar "sola" en el nombre
+writeFileSync(RUTA_MAQUETACION, `${JSON.stringify({ solas: solas.sort() }, null, 2)}\n`);
 
 const puestas = Object.values(calidades);
 const reparto = {};

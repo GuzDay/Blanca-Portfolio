@@ -1,5 +1,6 @@
 // Maquetación automática de la galería de un proyecto:
 // - dos fotos verticales seguidas → en pareja, una al lado de la otra
+// - una foto marcada "sola" nunca se empareja, aunque sea vertical
 // - todo lo demás → una fila para cada elemento
 import type { Elemento } from './contenido';
 
@@ -10,7 +11,7 @@ export function agruparEnFilas(galeria: Elemento[]): Fila[] {
   for (let i = 0; i < galeria.length; i++) {
     const actual = galeria[i];
     const siguiente = galeria[i + 1];
-    const esFotoVertical = (e?: Elemento) => e?.tipo === 'foto' && e.vertical;
+    const esFotoVertical = (e?: Elemento) => e?.tipo === 'foto' && e.vertical && !e.sola;
     if (esFotoVertical(actual) && esFotoVertical(siguiente)) {
       filas.push({ tipo: 'pareja', elementos: [actual, siguiente] });
       i++;

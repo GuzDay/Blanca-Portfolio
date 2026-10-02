@@ -88,6 +88,7 @@ código. Ahí puede:
 |---|---|
 | Añadir o quitar fotos y vídeos | Meterlos o sacarlos de la carpeta del proyecto |
 | Cambiar el orden de las fotos | Renombrarlas: manda el número (`Basyco 1`, `Basyco 2`…) |
+| Que una foto vertical salga sola, a lo ancho | Añadir `sola` a su nombre: `Londres 15 sola.jpg`. Por defecto dos verticales seguidas se ponen en pareja |
 | Cambiar el orden de los proyectos | El número de la carpeta (`01 White&One`, `02 Basyco - Retiro`…) |
 | Cambiar el título de un proyecto | Renombrar su carpeta: ese nombre sale en la web |
 | Mover un proyecto de categoría | Arrastrar su carpeta a otra categoría |

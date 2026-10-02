@@ -5,6 +5,7 @@ import { categorias, type Categoria } from '../i18n/categorias';
 import textoAjustes from '../../contenido/ajustes.yaml?raw';
 import textoInicio from '../../contenido/home.yaml?raw';
 import tablaCalidades from '../../contenido/calidades.json';
+import maquetacion from '../../contenido/maquetacion.json';
 
 // Cada foto se comprime con la calidad que necesita, no con una para todas: la
 // calcula scripts/actualizar.mjs y la deja apuntada en contenido/calidades.json.
@@ -12,6 +13,11 @@ import tablaCalidades from '../../contenido/calidades.json';
 // no. Con un número único, o pesaban de más las fáciles o salían regulares las
 // difíciles.
 const CALIDAD_POR_DEFECTO = 86;
+
+// Fotos que no se emparejan con la de al lado, sino que ocupan el ancho entero.
+// Se marcan poniendo "sola" en el nombre del archivo en la carpeta de Blanca.
+const fotosSolas = new Set((maquetacion.solas ?? []) as string[]);
+const vaSola = (ruta: string): boolean => fotosSolas.has(ruta.replace('/contenido/', ''));
 export const calidadDe = (ruta: string): number =>
   (tablaCalidades as Record<string, number>)[ruta.replace('/contenido/', '')] ?? CALIDAD_POR_DEFECTO;
 
@@ -21,6 +27,7 @@ export interface Foto {
   imagen: ImageMetadata;
   vertical: boolean;
   calidad: number;
+  sola: boolean; // ocupa el ancho entero aunque sea vertical
 }
 
 export interface Video {
@@ -135,6 +142,7 @@ function leerProyecto(rutaYaml: string, texto: string): Proyecto {
         imagen,
         vertical: imagen.height > imagen.width,
         calidad: calidadDe(ruta),
+        sola: vaSola(ruta),
       });
     }
   }
