@@ -3,11 +3,16 @@
 # Al pulsar una foto se abre su categoría.
 #
 # Doce fotos: dos de cada categoría.
-# El ORDEN importa: la espiral coloca cada foto según su posición en esta lista,
-# así que las dos de una misma categoría conviene tenerlas lejos. Ahora mismo
-# ninguna pareja está a menos de cinco puestos:
-#   moda 1 y 7 · viajes 2 y 12 · interiorismo 3 y 8
-#   música 4 y 9 · eventos 5 y 10 · foto fija 6 y 11
+#
+# El ORDEN importa, pero NO como parecería: la espiral coloca cada foto con el
+# ángulo áureo (137,5° por puesto), así que estar lejos en esta lista no es
+# estar lejos en pantalla. Separar cinco puestos es justo el PEOR caso: deja
+# las dos fotos a 33° una de otra, casi en la misma línea desde el centro.
+#
+# Este reparto es el que más separa en pantalla las dos fotos de cada categoría
+# (la pareja más junta queda al doble de distancia que con cualquier orden
+# "intuitivo"). Si cambias una foto de puesto, mantén estas parejas:
+#   1 y 10 · 2 y 11 · 3 y 12 · 4 y 8 · 5 y 9 · 6 y 7
 
 fotos:
   - moda/basyco-estudio/01.jpg
@@ -16,9 +21,9 @@ fotos:
   - musica/juicy-sessions-sesion-de-musica/08.jpg
   - eventos/helarea-evento/01.jpg
   - foto-fija/cold-culture/02.jpg
-  - moda/white-y-one-1/02.jpg
-  - interiorismo/viviendas/16.jpg
+  - foto-fija/cold-culture/06.jpg
   - musica/juicy-sessions-sesion-de-musica/02.jpg
   - eventos/helarea-evento/04.jpg
-  - foto-fija/cold-culture/06.jpg
+  - moda/white-y-one-1/02.jpg
   - viajes/tailandia/10.jpg
+  - interiorismo/viviendas/16.jpg
