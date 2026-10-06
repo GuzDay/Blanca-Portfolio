@@ -92,6 +92,7 @@ código. Ahí puede:
 | Cambiar el orden de los proyectos | El número de la carpeta (`01 White&One`, `02 Basyco - Retiro`…) |
 | Cambiar el título de un proyecto | Renombrar su carpeta: ese nombre sale en la web |
 | Mover un proyecto de categoría | Arrastrar su carpeta a otra categoría |
+| Quitar un proyecto de la web sin borrarlo | Añadir `(oculto)` al nombre de su carpeta. Desaparece de la web pero sigue en la carpeta de Blanca; quitando la palabra vuelve |
 | Cambiar lo que cae en Contacto | La carpeta `Contacto`, archivos `Contacto - Animación 35`, 36… |
 | Cambiar el retrato de Contacto | Sustituir `00 Foto de Contacto.JPG` (la única foto de la carpeta `Contacto` que no se llama «Animación») |
 

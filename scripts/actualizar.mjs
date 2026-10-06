@@ -257,7 +257,11 @@ async function pasarProyectos() {
     const destinoCategoria = join(CONTENIDO, 'proyectos', categoria);
     mkdirSync(destinoCategoria, { recursive: true });
 
-    const proyectos = listar(base).filter((n) => statSync(join(base, n)).isDirectory());
+    // Un proyecto con "oculto" en el nombre de la carpeta no sale en la web, pero
+    // se queda en la carpeta de Blanca tal cual. Quitarle la palabra lo devuelve.
+    const proyectos = listar(base).filter(
+      (n) => statSync(join(base, n)).isDirectory() && !/(^|[\s_([-])oculto([\s_)\]-]|$)/i.test(sinTildes(n)),
+    );
     const esperados = new Set();
 
     for (const proyecto of proyectos.sort(ordenNatural)) {
