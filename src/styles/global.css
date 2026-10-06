@@ -4,10 +4,13 @@
    ========================================================================== */
 
 :root {
-  --fondo: #f3efe6;
-  /* El mismo tono que --fondo, con transparencia, para el cristal esmerilado
-     de la cabecera y del menú. Si cambias --fondo, cambia también este. */
-  --cristal: rgba(243, 239, 230, 0.62);
+  --fondo: #f3efe9;
+  /* El mismo tono que --fondo, con transparencia. Van aquí los dos para que
+     cambiar el fondo sea cambiar estas tres líneas y ninguna más:
+     --cristal, el esmerilado de la cabecera y del menú;
+     --velo, el círculo del botón de play sobre los vídeos. */
+  --cristal: rgba(243, 239, 233, 0.62);
+  --velo: rgb(243 239 233 / 0.92);
   --cristal-desenfoque: blur(10px) saturate(140%);
   --texto: #1a1a1a;
   --gris: #6b6b6b;
@@ -752,7 +755,7 @@ html:has(.menu-abierto) {
   width: 4.5rem;
   height: 4.5rem;
   border-radius: 50%;
-  background: rgb(247 245 242 / 0.92);
+  background: var(--velo);
   transition: transform 0.2s ease;
 }
 
