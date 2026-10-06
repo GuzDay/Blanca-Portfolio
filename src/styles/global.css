@@ -4,10 +4,10 @@
    ========================================================================== */
 
 :root {
-  --fondo: #f7f5f2;
+  --fondo: #f3efe6;
   /* El mismo tono que --fondo, con transparencia, para el cristal esmerilado
      de la cabecera y del menú. Si cambias --fondo, cambia también este. */
-  --cristal: rgba(247, 245, 242, 0.62);
+  --cristal: rgba(243, 239, 230, 0.62);
   --cristal-desenfoque: blur(10px) saturate(140%);
   --texto: #1a1a1a;
   --gris: #6b6b6b;
